@@ -115,9 +115,16 @@ export const myAssignments = [
 ];
 
 export const calendarDays = [
-  { day: 18, label: "Confirmed", tone: "confirmed", title: "Red Hot Winter" },
-  { day: 20, label: "Booked", tone: "confirmed", title: "Booth Activation" },
-  { day: 21, label: "Open", tone: "open", title: "Product Shoot" },
-  { day: 24, label: "Unavailable", tone: "blocked", title: "Blocked out" },
-  { day: 27, label: "Open", tone: "open", title: "Launch Party" }
+  { date: "2026-06-18", label: "Confirmed", tone: "confirmed", title: "Red Hot Winter" },
+  { date: "2026-06-20", label: "Booked", tone: "confirmed", title: "Booth Activation" },
+  { date: "2026-06-21", label: "Open", tone: "open", title: "Product Shoot" },
+  { date: "2026-06-24", label: "Unavailable", tone: "blocked", title: "Blocked out" },
+  { date: "2026-06-27", label: "Open", tone: "open", title: "Launch Party" },
+  { date: "2026-07-02", label: "Open", tone: "open", title: "Content Drop" },
+  { date: "2026-07-08", label: "Hold", tone: "hold", title: "Promo Hold" },
+  { date: "2026-07-14", label: "Booked", tone: "confirmed", title: "Product Shoot" },
+  { date: "2026-07-19", label: "Unavailable", tone: "blocked", title: "Blocked out" },
+  { date: "2026-08-01", label: "Open", tone: "open", title: "Launch Party" },
+  { date: "2026-08-09", label: "Hold", tone: "hold", title: "Client Hold" },
+  { date: "2026-08-15", label: "Confirmed", tone: "confirmed", title: "Brand Night" }
 ];

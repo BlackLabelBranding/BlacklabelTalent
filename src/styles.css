@@ -535,6 +535,24 @@ p {
   width: 100%;
 }
 
+.icon-button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-weight: 950;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .calendar-panel {
   max-width: 1180px;
 }
@@ -559,6 +577,10 @@ p {
 
 .legend-dot.open {
   background: var(--green);
+}
+
+.legend-dot.hold {
+  background: var(--gold);
 }
 
 .legend-dot.confirmed {
@@ -603,6 +625,11 @@ p {
   border-color: var(--line-strong);
 }
 
+.calendar-day.empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .calendar-day strong,
 .calendar-day span,
 .calendar-day small {
@@ -636,6 +663,12 @@ p {
   border-color: rgba(24, 243, 255, 0.34);
   background: rgba(24, 243, 255, 0.1);
   color: var(--cyan);
+}
+
+.calendar-day.hold {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: rgba(255, 209, 102, 0.11);
+  color: var(--gold);
 }
 
 .calendar-day.blocked {
@@ -875,6 +908,20 @@ p {
     flex-direction: column;
   }
 
+  .calendar-controls {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    width: 100%;
+  }
+
+  .calendar-controls .icon-button {
+    width: 100%;
+  }
+
+  .calendar-controls .count-pill {
+    justify-content: center;
+  }
+
   .gig-actions {
     display: grid;
     grid-template-columns: 1fr;
@@ -890,6 +937,10 @@ p {
 
   .calendar-day {
     min-height: auto;
+  }
+
+  .calendar-day.empty {
+    display: none;
   }
 
   .detail-row {

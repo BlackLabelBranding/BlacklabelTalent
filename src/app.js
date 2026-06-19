@@ -30,6 +30,7 @@ const statusTone = {
 };
 
 let dashboardState = null;
+let activeCalendarMonth = "2026-06";
 
 function escapeHtml(value) {
   return String(value)
@@ -119,10 +120,44 @@ function assignmentRow(assignment) {
   `;
 }
 
+function parseMonth(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return { year, month };
+}
+
+function monthKeyFromDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function shiftMonth(monthKey, amount) {
+  const { year, month } = parseMonth(monthKey);
+  return monthKeyFromDate(new Date(year, month - 1 + amount, 1));
+}
+
+function monthTitle(monthKey) {
+  const { year, month } = parseMonth(monthKey);
+  return new Date(year, month - 1, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric"
+  });
+}
+
 function talentCalendar(days) {
-  const dayMap = new Map(days.map((day) => [day.day, day]));
-  const dayButtons = Array.from({ length: 30 }, (_, index) => {
-    const date = index + 1;
+  const { year, month } = parseMonth(activeCalendarMonth);
+  const firstDay = new Date(year, month - 1, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const leadingBlanks = (firstDay.getDay() + 6) % 7;
+  const visibleDays = days.filter((day) => day.date.startsWith(activeCalendarMonth));
+  const dayMap = new Map(visibleDays.map((day) => [Number(day.date.slice(-2)), day]));
+  const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7;
+
+  const dayButtons = Array.from({ length: totalCells }, (_, index) => {
+    const date = index - leadingBlanks + 1;
+
+    if (date < 1 || date > daysInMonth) {
+      return `<div class="calendar-day empty" aria-hidden="true"></div>`;
+    }
+
     const item = dayMap.get(date);
     return `
       <button class="calendar-day ${item ? escapeHtml(item.tone) : ""}" type="button">
@@ -141,13 +176,18 @@ function talentCalendar(days) {
       <div class="section-head">
         <div>
           <p class="mini-label">Your month</p>
-          <h2>June 2026</h2>
+          <h2>${escapeHtml(monthTitle(activeCalendarMonth))}</h2>
         </div>
-        <span class="count-pill">5 marked dates</span>
+        <div class="calendar-controls" aria-label="Month controls">
+          <button class="icon-button" type="button" data-calendar-shift="-1">Prev</button>
+          <span class="count-pill">${visibleDays.length} marked dates</span>
+          <button class="icon-button" type="button" data-calendar-shift="1">Next</button>
+        </div>
       </div>
 
       <div class="calendar-legend">
         <span><i class="legend-dot open"></i>Open gig</span>
+        <span><i class="legend-dot hold"></i>Hold</span>
         <span><i class="legend-dot confirmed"></i>Booked</span>
         <span><i class="legend-dot blocked"></i>Unavailable</span>
       </div>
@@ -451,6 +491,13 @@ function render(dashboard) {
 }
 
 root.addEventListener("click", async (event) => {
+  const monthButton = event.target.closest("[data-calendar-shift]");
+  if (monthButton) {
+    activeCalendarMonth = shiftMonth(activeCalendarMonth, Number(monthButton.dataset.calendarShift));
+    if (dashboardState) render(dashboardState);
+    return;
+  }
+
   const button = event.target.closest("[data-action]");
   if (!button) return;
 
