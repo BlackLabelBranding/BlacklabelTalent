@@ -9,5 +9,8 @@ await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 await cp(resolve(root, "index.html"), resolve(dist, "index.html"));
 await cp(resolve(root, "src"), resolve(dist, "src"), { recursive: true });
+await cp(resolve(root, "manifest.webmanifest"), resolve(dist, "manifest.webmanifest"));
+await cp(resolve(root, "sw.js"), resolve(dist, "sw.js"));
+await cp(resolve(root, "icons"), resolve(dist, "icons"), { recursive: true });
 
 console.log("Built static Talent Portal to dist/");

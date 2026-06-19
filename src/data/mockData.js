@@ -4,7 +4,27 @@ export const talentProfile = {
   status: "Available this week",
   rating: "Preferred",
   nextGig: "Red Hot Winter Campaign",
-  payPending: "$225"
+  payPending: "$225",
+  city: "Vandalia, IL",
+  phone: "(555) 014-2291",
+  email: "shelby@example.com",
+  bio: "Available for promo events, product shoots, brand activations, and social content.",
+  roles: ["Model", "Brand Ambassador", "Influencer"],
+  notAvailableFor: ["Merch production", "Heavy setup", "Loading/unloading"],
+  sizes: {
+    shirt: "S",
+    shoe: "8",
+    height: "5'7\""
+  },
+  socials: {
+    instagram: "@shelbycreates",
+    tiktok: "@shelbycreates"
+  },
+  agreements: [
+    { name: "Talent Agreement", status: "Signed" },
+    { name: "Photo Release", status: "Signed" },
+    { name: "W-9", status: "Needs update" }
+  ]
 };
 
 export const gigOpportunities = [
@@ -19,7 +39,13 @@ export const gigOpportunities = [
     status: "Open",
     contractStatus: "Contract sent after admin confirmation",
     requirements: "Product modeling only. No production, packing, setup, or manual labor.",
-    deliverables: "12 photo looks, 2 short video clips"
+    deliverables: "12 photo looks, 2 short video clips",
+    time: "2:00 PM - 5:00 PM",
+    dressCode: "Black fitted outfit, clean sneakers, light glam.",
+    manualLabor: "No",
+    contentRequired: "Yes",
+    appearanceRequired: "Yes",
+    notes: "Arrive camera-ready. Final call sheet appears after admin confirms your booking."
   },
   {
     id: "gig-1002",
@@ -32,7 +58,13 @@ export const gigOpportunities = [
     status: "Open",
     contractStatus: "Not sent",
     requirements: "Customer-facing promo, guest greeting, and social tags.",
-    deliverables: "Event appearance, 3 story posts"
+    deliverables: "Event appearance, 3 story posts",
+    time: "7:00 PM - 11:00 PM",
+    dressCode: "Black Label approved event look.",
+    manualLabor: "No",
+    contentRequired: "Yes",
+    appearanceRequired: "Yes",
+    notes: "Must be comfortable talking to guests and representing the brand."
   },
   {
     id: "gig-1003",
@@ -45,7 +77,13 @@ export const gigOpportunities = [
     status: "Open",
     contractStatus: "Not sent",
     requirements: "Remote content only.",
-    deliverables: "1 reel, 3 story frames"
+    deliverables: "1 reel, 3 story frames",
+    time: "Post window: July 2 - July 4",
+    dressCode: "Product-forward styling.",
+    manualLabor: "No",
+    contentRequired: "Yes",
+    appearanceRequired: "No",
+    notes: "Content guidelines and tags are released after assignment approval."
   }
 ];
 

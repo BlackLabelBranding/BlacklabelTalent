@@ -42,12 +42,14 @@ function escapeHtml(value) {
 
 function currentRoute() {
   const hash = globalThis.location.hash.replace("#", "");
+  if (hash.startsWith("gig/")) return hash;
   return routes[hash] ? hash : "home";
 }
 
 function navMarkup(activeRoute) {
+  const normalizedRoute = activeRoute.startsWith("gig/") ? "gigs" : activeRoute;
   return Object.entries(routes)
-    .map(([route, label]) => `<a href="#${route}" class="${route === activeRoute ? "active" : ""}">${label}</a>`)
+    .map(([route, label]) => `<a href="#${route}" class="${route === normalizedRoute ? "active" : ""}">${label}</a>`)
     .join("");
 }
 
@@ -87,6 +89,7 @@ function gigCard(gig, featured = false) {
       </div>
 
       <div class="gig-actions">
+        <a class="button button-secondary" href="#gig/${escapeHtml(gig.id)}">View details</a>
         <button class="button button-primary" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">
           Accept
         </button>
@@ -170,6 +173,15 @@ function renderToast(message) {
   document.querySelector(".content").prepend(toast);
 }
 
+function detailRow(label, value) {
+  return `
+    <div class="detail-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `;
+}
+
 function homeView({ profile, openGigs, assignments }) {
   const nextGig = assignments[0];
   return `
@@ -238,6 +250,72 @@ function gigsView({ openGigs }) {
   `;
 }
 
+function gigDetailView(dashboard, gigId) {
+  const gig = dashboard.openGigs.find((item) => item.id === gigId);
+
+  if (!gig) {
+    return `
+      <section class="page-head">
+        <p class="mini-label">Gig detail</p>
+        <h1>Gig not found</h1>
+        <p>This opportunity may have been filled or removed.</p>
+        <a class="button button-primary" href="#gigs">Back to open gigs</a>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="page-head detail-head">
+      <a class="back-link" href="#gigs">Back to open gigs</a>
+      <p class="mini-label">${escapeHtml(gig.role)}</p>
+      <h1>${escapeHtml(gig.title)}</h1>
+      <p>${escapeHtml(gig.requirements)}</p>
+    </section>
+
+    <section class="detail-grid">
+      <article class="panel detail-main">
+        <div class="section-head">
+          <div>
+            <p class="mini-label">Gig details</p>
+            <h2>${escapeHtml(gig.date)}</h2>
+          </div>
+          <span class="pill open">${escapeHtml(gig.status)}</span>
+        </div>
+
+        <div class="detail-list">
+          ${detailRow("Time", gig.time)}
+          ${detailRow("Location", gig.location)}
+          ${detailRow("Pay", gig.pay)}
+          ${detailRow("Dress code", gig.dressCode)}
+          ${detailRow("Manual labor required", gig.manualLabor)}
+          ${detailRow("Content required", gig.contentRequired)}
+          ${detailRow("Appearance required", gig.appearanceRequired)}
+          ${detailRow("Contract", gig.contractStatus)}
+        </div>
+
+        <div class="deliverables detail-deliverables">
+          <span>Deliverables</span>
+          <p>${escapeHtml(gig.deliverables)}</p>
+        </div>
+      </article>
+
+      <aside class="panel detail-side">
+        <p class="mini-label">Notes from Black Label</p>
+        <h2>Before you accept</h2>
+        <p>${escapeHtml(gig.notes)}</p>
+        <div class="gig-actions stacked">
+          <button class="button button-primary full-width" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">
+            Accept this gig
+          </button>
+          <button class="button button-secondary full-width" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">
+            Decline
+          </button>
+        </div>
+      </aside>
+    </section>
+  `;
+}
+
 function calendarView({ calendarDays }) {
   return `
     <section class="page-head">
@@ -275,7 +353,13 @@ function profileView({ profile }) {
       <article class="panel profile-panel">
         <p class="mini-label">Talent profile</p>
         <h2>${escapeHtml(profile.role)}</h2>
-        <p>Status: ${escapeHtml(profile.status)}. Talent tier: ${escapeHtml(profile.rating)}.</p>
+        <p>${escapeHtml(profile.bio)}</p>
+        <div class="detail-list compact">
+          ${detailRow("Home base", profile.city)}
+          ${detailRow("Phone", profile.phone)}
+          ${detailRow("Email", profile.email)}
+          ${detailRow("Talent tier", profile.rating)}
+        </div>
         <button class="button button-primary" type="button">Update profile</button>
       </article>
       <article class="panel profile-panel">
@@ -284,11 +368,51 @@ function profileView({ profile }) {
         <p>Block out unavailable dates so Black Label Hub knows when not to offer gigs.</p>
         <button class="button button-secondary full-width" type="button">Update availability</button>
       </article>
+      <article class="panel profile-panel">
+        <p class="mini-label">Roles</p>
+        <h2>What you accept</h2>
+        <div class="chip-list">
+          ${profile.roles.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}
+        </div>
+        <p class="mini-label profile-subhead">Not available for</p>
+        <div class="chip-list muted">
+          ${profile.notAvailableFor.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}
+        </div>
+      </article>
+      <article class="panel profile-panel">
+        <p class="mini-label">Sizing and socials</p>
+        <h2>Booking info</h2>
+        <div class="detail-list compact">
+          ${detailRow("Height", profile.sizes.height)}
+          ${detailRow("Shirt", profile.sizes.shirt)}
+          ${detailRow("Shoe", profile.sizes.shoe)}
+          ${detailRow("Instagram", profile.socials.instagram)}
+          ${detailRow("TikTok", profile.socials.tiktok)}
+        </div>
+      </article>
+      <article class="panel profile-panel agreements-panel">
+        <p class="mini-label">Agreements</p>
+        <h2>Contract status</h2>
+        <div class="assignment-list">
+          ${profile.agreements
+            .map(
+              (agreement) => `
+                <div class="agreement-row">
+                  <strong>${escapeHtml(agreement.name)}</strong>
+                  <span class="pill ${agreement.status === "Signed" ? "confirmed" : "attention"}">${escapeHtml(agreement.status)}</span>
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      </article>
     </section>
   `;
 }
 
 function routeView(route, dashboard) {
+  if (route.startsWith("gig/")) return gigDetailView(dashboard, route.split("/")[1]);
+
   const views = {
     home: homeView,
     gigs: gigsView,
@@ -348,3 +472,9 @@ globalThis.addEventListener("hashchange", () => {
 
 root.innerHTML = `<main class="loading">Loading Talent Portal...</main>`;
 getTalentDashboard().then(render);
+
+if ("serviceWorker" in navigator) {
+  globalThis.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
