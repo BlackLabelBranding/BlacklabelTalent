@@ -1,10 +1,11 @@
-const CACHE_NAME = "blacklabel-talent-v1";
+const CACHE_NAME = "blacklabel-talent-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./src/app.js",
   "./src/styles.css",
+  "./src/live.css",
   "./src/data/mockData.js",
   "./src/lib/hubApi.js",
   "./icons/icon-192.svg",
