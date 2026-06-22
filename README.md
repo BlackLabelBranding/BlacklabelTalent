@@ -2,7 +2,21 @@
 
 Standalone front-facing app for Black Label talent: models, brand ambassadors, influencers, hosts, photographers, and promo staff.
 
-Black Label Hub remains the backend/admin control center. This app should only expose talent-facing workflows.
+Black Label Hub remains the backend/admin control center. This app only exposes talent-facing workflows.
+
+## Live Supabase Wiring
+
+The portal now talks directly to the shared Black Label Hub Supabase project:
+
+- Project ref: `xopcttkrmjvwdddawdaa`
+- Auth: Supabase email/password login
+- Profile: `team_members` plus `roster_profiles`
+- Open Gigs: `opportunity_invitations`
+- My Gigs: `work_assignments`
+- Calendar: `talent_availability`, invitations, and assignments
+- Responses: updates `opportunity_invitations.status` to `interested`, `accepted`, or `declined`
+
+The browser client uses the project publishable/anon key only. Do not add service-role keys or secrets to this repo.
 
 ## Product Boundary
 
@@ -14,14 +28,13 @@ Black Label Hub remains the backend/admin control center. This app should only e
 
 Do not duplicate event records in this app.
 
-The Talent Portal should consume event-linked gig opportunities from Hub/Supabase:
+The Talent Portal consumes event-linked gig opportunities from Hub/Supabase:
 
 ```text
-events
-  -> gig_opportunities
-  -> gig_assignments
-  -> contracts
-  -> payments
+work_opportunities
+  -> opportunity_invitations
+  -> work_assignments
+  -> assignment_contracts
 ```
 
 ## Local Development
@@ -30,38 +43,9 @@ events
 npm run dev
 ```
 
-This starter intentionally has no package dependencies. It can also be served with any static file server.
+This app intentionally has no package dependencies. It can also be served with any static file server.
 
-## Backend Wiring Plan
-
-For the first UI pass, data comes from `src/data/mockData.js`.
-
-When ready to connect the app:
-
-1. Keep the master event table in Black Label Hub/Supabase as the source of truth.
-2. Replace mock functions in `src/lib/hubApi.js`.
-3. Fetch only talent-visible fields.
-4. Keep internal notes, client-private details, and other talent pay private.
-5. Use authenticated requests tied to the logged-in talent profile.
-
-## MVP Screens
-
-- Today / next gig summary
-- Open gig opportunities
-- Gig detail screen with requirements, pay, dress code, labor rules, and deliverables
-- Talent calendar
-- My gigs
-- Contract and payment status
-- Profile and availability controls
-
-## PWA Notes
-
-This app includes:
-
-- `manifest.webmanifest`
-- `sw.js`
-- installable app icons in `icons/`
-- mobile bottom navigation through responsive CSS
+## Deployment
 
 On Vercel, deploy with:
 
@@ -70,3 +54,12 @@ Build Command: npm run build
 Output Directory: dist
 Framework Preset: Other
 ```
+
+## Notes For Hub Setup
+
+For a talent login to show live records, the Supabase auth user must match a `team_members` row by either:
+
+- `team_members.user_id = auth.users.id`
+- `team_members.email = auth.users.email`
+
+Talent-specific RLS policies must allow authenticated talent to read their own `team_members`, `roster_profiles`, `opportunity_invitations`, `work_opportunities`, `work_opportunity_roles`, `work_assignments`, `assignment_contracts`, and `talent_availability` rows, plus update only their own `opportunity_invitations.status` response fields.
