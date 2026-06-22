@@ -1,4 +1,12 @@
-import { acceptGig, declineGig, getTalentDashboard } from "./lib/hubApi.js";
+import {
+  acceptGig,
+  declineGig,
+  getAuthState,
+  getTalentDashboard,
+  interestedGig,
+  signInWithPassword,
+  signOut
+} from "./lib/hubApi.js";
 
 const root = document.querySelector("#root");
 
@@ -8,7 +16,6 @@ const icons = {
   contract: "DOC",
   location: "PIN",
   person: "ROLE",
-  clock: "TIME",
   check: "OK"
 };
 
@@ -22,17 +29,22 @@ const routes = {
 
 const statusTone = {
   Open: "open",
+  Sent: "open",
+  Viewed: "open",
+  Interested: "hold",
+  Accepted: "confirmed",
+  Assigned: "confirmed",
   Confirmed: "confirmed",
-  "Needs signature": "attention",
   Signed: "confirmed",
+  "Needs signature": "attention",
   "Pending completion": "attention",
   Pending: "attention"
 };
 
 let dashboardState = null;
-let activeCalendarMonth = "2026-06";
+let activeCalendarMonth = monthKeyFromDate(new Date());
 
-function escapeHtml(value) {
+function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -64,6 +76,16 @@ function stat(icon, label, value) {
   `;
 }
 
+function emptyState(title, copy, action = "") {
+  return `
+    <article class="empty-state">
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(copy)}</p>
+      ${action}
+    </article>
+  `;
+}
+
 function gigCard(gig, featured = false) {
   const tone = statusTone[gig.status] || "neutral";
   return `
@@ -75,28 +97,21 @@ function gigCard(gig, featured = false) {
         </div>
         <span class="pill ${tone}">${escapeHtml(gig.status)}</span>
       </div>
-
       <div class="gig-meta">
         <span>${icons.person} ${escapeHtml(gig.role)}</span>
         <span>${icons.location} ${escapeHtml(gig.location)}</span>
         <span>${icons.pay} ${escapeHtml(gig.pay)}</span>
       </div>
-
       <p class="gig-note">${escapeHtml(gig.requirements)}</p>
-
       <div class="deliverables">
         <span>Deliverables</span>
         <p>${escapeHtml(gig.deliverables)}</p>
       </div>
-
       <div class="gig-actions">
         <a class="button button-secondary" href="#gig/${escapeHtml(gig.id)}">View details</a>
-        <button class="button button-primary" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">
-          Accept
-        </button>
-        <button class="button button-secondary" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">
-          Decline
-        </button>
+        <button class="button button-secondary" type="button" data-action="interested" data-gig-id="${escapeHtml(gig.id)}">Interested</button>
+        <button class="button button-primary" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">Accept</button>
+        <button class="button button-secondary" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">Decline</button>
       </div>
     </article>
   `;
@@ -153,20 +168,12 @@ function talentCalendar(days) {
 
   const dayButtons = Array.from({ length: totalCells }, (_, index) => {
     const date = index - leadingBlanks + 1;
-
-    if (date < 1 || date > daysInMonth) {
-      return `<div class="calendar-day empty" aria-hidden="true"></div>`;
-    }
-
+    if (date < 1 || date > daysInMonth) return `<div class="calendar-day empty" aria-hidden="true"></div>`;
     const item = dayMap.get(date);
     return `
       <button class="calendar-day ${item ? escapeHtml(item.tone) : ""}" type="button">
         <strong>${date}</strong>
-        ${
-          item
-            ? `<span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.title)}</small>`
-            : "<small>Open date</small>"
-        }
+        ${item ? `<span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.title)}</small>` : "<small>Open date</small>"}
       </button>
     `;
   }).join("");
@@ -184,33 +191,28 @@ function talentCalendar(days) {
           <button class="icon-button" type="button" data-calendar-shift="1">Next</button>
         </div>
       </div>
-
       <div class="calendar-legend">
         <span><i class="legend-dot open"></i>Open gig</span>
-        <span><i class="legend-dot hold"></i>Hold</span>
+        <span><i class="legend-dot hold"></i>Interested / hold</span>
         <span><i class="legend-dot confirmed"></i>Booked</span>
         <span><i class="legend-dot blocked"></i>Unavailable</span>
       </div>
-
       <div class="weekday-grid" aria-hidden="true">
         <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
       </div>
-
       <div class="month-grid">${dayButtons}</div>
     </section>
   `;
 }
 
-function renderToast(message) {
+function renderToast(message, tone = "success") {
   const existing = document.querySelector(".toast");
   if (existing) existing.remove();
-
   const toast = document.createElement("div");
-  toast.className = "toast";
+  toast.className = `toast ${tone}`;
   toast.setAttribute("role", "status");
   toast.innerHTML = `<span aria-hidden="true">${icons.check}</span>${escapeHtml(message)}`;
-
-  document.querySelector(".content").prepend(toast);
+  document.querySelector(".content")?.prepend(toast);
 }
 
 function detailRow(label, value) {
@@ -229,9 +231,7 @@ function homeView({ profile, openGigs, assignments }) {
       <div>
         <p class="mini-label">Black Label Talent</p>
         <h1>Book the gig. Own the night.</h1>
-        <p class="hero-copy">
-          Your gigs, contracts, pay, and availability in one place.
-        </p>
+        <p class="hero-copy">Your gigs, contracts, pay, and availability in one place.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#gigs">See open gigs</a>
           <a class="button button-secondary glass" href="#calendar">Open calendar</a>
@@ -242,13 +242,11 @@ function homeView({ profile, openGigs, assignments }) {
         <strong>${escapeHtml(profile.status)}</strong>
       </div>
     </section>
-
     <section class="stats-grid" aria-label="Talent summary">
       ${stat(icons.calendar, "Next gig", profile.nextGig)}
       ${stat(icons.pay, "Pending pay", profile.payPending)}
       ${stat(icons.contract, "Talent status", profile.rating)}
     </section>
-
     <div class="home-grid">
       <section class="panel">
         <div class="section-head">
@@ -258,19 +256,25 @@ function homeView({ profile, openGigs, assignments }) {
           </div>
           <span class="count-pill">${openGigs.length} live</span>
         </div>
-        ${gigCard(openGigs[0], true)}
+        ${
+          openGigs[0]
+            ? gigCard(openGigs[0], true)
+            : emptyState("No open gigs yet", "New invitations from Black Label Hub will appear here as soon as they are sent.")
+        }
       </section>
-
       <section class="panel next-panel">
         <div class="section-head">
           <div>
             <p class="mini-label">Next up</p>
             <h2>Booked Status</h2>
           </div>
-          <span class="pill attention">${escapeHtml(nextGig.contractStatus)}</span>
+          <span class="pill attention">${escapeHtml(nextGig?.contractStatus || "No active booking")}</span>
         </div>
-        <h3>${escapeHtml(nextGig.title)}</h3>
-        <p>${escapeHtml(nextGig.role)} in ${escapeHtml(nextGig.location)}. Pay is ${escapeHtml(nextGig.pay)}.</p>
+        ${
+          nextGig
+            ? `<h3>${escapeHtml(nextGig.title)}</h3><p>${escapeHtml(nextGig.role)} in ${escapeHtml(nextGig.location)}. Pay is ${escapeHtml(nextGig.pay)}.</p>`
+            : `<p>You do not have a confirmed gig yet. Accepted opportunities move here after admin confirmation.</p>`
+        }
         <a class="button button-secondary full-width" href="#assignments">View my gigs</a>
       </section>
     </div>
@@ -285,20 +289,19 @@ function gigsView({ openGigs }) {
       <p>Accept only the roles and requirements that fit you. Admin confirms final booking from Black Label Hub.</p>
     </section>
     <section class="gig-list page-list">
-      ${openGigs.map((gig) => gigCard(gig)).join("")}
+      ${openGigs.length ? openGigs.map((gig) => gigCard(gig)).join("") : emptyState("No open invitations", "You are connected to live Supabase data. Open opportunities will appear here after Hub sends them.")}
     </section>
   `;
 }
 
 function gigDetailView(dashboard, gigId) {
   const gig = dashboard.openGigs.find((item) => item.id === gigId);
-
   if (!gig) {
     return `
       <section class="page-head">
         <p class="mini-label">Gig detail</p>
         <h1>Gig not found</h1>
-        <p>This opportunity may have been filled or removed.</p>
+        <p>This opportunity may have been filled, declined, or removed.</p>
         <a class="button button-primary" href="#gigs">Back to open gigs</a>
       </section>
     `;
@@ -311,7 +314,6 @@ function gigDetailView(dashboard, gigId) {
       <h1>${escapeHtml(gig.title)}</h1>
       <p>${escapeHtml(gig.requirements)}</p>
     </section>
-
     <section class="detail-grid">
       <article class="panel detail-main">
         <div class="section-head">
@@ -319,9 +321,8 @@ function gigDetailView(dashboard, gigId) {
             <p class="mini-label">Gig details</p>
             <h2>${escapeHtml(gig.date)}</h2>
           </div>
-          <span class="pill open">${escapeHtml(gig.status)}</span>
+          <span class="pill ${statusTone[gig.status] || "open"}">${escapeHtml(gig.status)}</span>
         </div>
-
         <div class="detail-list">
           ${detailRow("Time", gig.time)}
           ${detailRow("Location", gig.location)}
@@ -332,24 +333,19 @@ function gigDetailView(dashboard, gigId) {
           ${detailRow("Appearance required", gig.appearanceRequired)}
           ${detailRow("Contract", gig.contractStatus)}
         </div>
-
         <div class="deliverables detail-deliverables">
           <span>Deliverables</span>
           <p>${escapeHtml(gig.deliverables)}</p>
         </div>
       </article>
-
       <aside class="panel detail-side">
         <p class="mini-label">Notes from Black Label</p>
         <h2>Before you accept</h2>
         <p>${escapeHtml(gig.notes)}</p>
         <div class="gig-actions stacked">
-          <button class="button button-primary full-width" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">
-            Accept this gig
-          </button>
-          <button class="button button-secondary full-width" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">
-            Decline
-          </button>
+          <button class="button button-secondary full-width" type="button" data-action="interested" data-gig-id="${escapeHtml(gig.id)}">Mark interested</button>
+          <button class="button button-primary full-width" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">Accept this gig</button>
+          <button class="button button-secondary full-width" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">Decline</button>
         </div>
       </aside>
     </section>
@@ -376,19 +372,20 @@ function assignmentsView({ assignments }) {
     </section>
     <section class="panel">
       <div class="assignment-list">
-        ${assignments.map(assignmentRow).join("")}
+        ${assignments.length ? assignments.map(assignmentRow).join("") : emptyState("No confirmed gigs", "Accepted opportunities will move here once Black Label admin confirms an assignment.")}
       </div>
     </section>
   `;
 }
 
-function profileView({ profile }) {
+function profileView({ profile, user, teamMember }) {
   return `
     <section class="page-head">
       <p class="mini-label">Profile</p>
       <h1>${escapeHtml(profile.name)}</h1>
-      <p>Manage your talent profile, role preferences, blackout dates, and agreement status.</p>
+      <p>Live profile data comes from team_members and roster_profiles in Black Label Hub.</p>
     </section>
+    ${teamMember ? "" : emptyState("No linked team member", "This login is valid, but it is not linked to a team_members row yet. Add this user's auth id or email in Hub to activate the portal.")}
     <section class="profile-grid">
       <article class="panel profile-panel">
         <p class="mini-label">Talent profile</p>
@@ -397,27 +394,21 @@ function profileView({ profile }) {
         <div class="detail-list compact">
           ${detailRow("Home base", profile.city)}
           ${detailRow("Phone", profile.phone)}
-          ${detailRow("Email", profile.email)}
+          ${detailRow("Email", profile.email || user?.email || "")}
           ${detailRow("Talent tier", profile.rating)}
         </div>
-        <button class="button button-primary" type="button">Update profile</button>
       </article>
       <article class="panel profile-panel">
         <p class="mini-label">Availability</p>
         <h2>Control your dates</h2>
-        <p>Block out unavailable dates so Black Label Hub knows when not to offer gigs.</p>
-        <button class="button button-secondary full-width" type="button">Update availability</button>
+        <p>Availability shown in the calendar comes from talent_availability records in Hub.</p>
       </article>
       <article class="panel profile-panel">
         <p class="mini-label">Roles</p>
         <h2>What you accept</h2>
-        <div class="chip-list">
-          ${profile.roles.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}
-        </div>
+        <div class="chip-list">${profile.roles.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}</div>
         <p class="mini-label profile-subhead">Not available for</p>
-        <div class="chip-list muted">
-          ${profile.notAvailableFor.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}
-        </div>
+        <div class="chip-list muted">${profile.notAvailableFor.map((role) => `<span>${escapeHtml(role)}</span>`).join("") || "<span>Not set</span>"}</div>
       </article>
       <article class="panel profile-panel">
         <p class="mini-label">Sizing and socials</p>
@@ -430,43 +421,42 @@ function profileView({ profile }) {
           ${detailRow("TikTok", profile.socials.tiktok)}
         </div>
       </article>
-      <article class="panel profile-panel agreements-panel">
-        <p class="mini-label">Agreements</p>
-        <h2>Contract status</h2>
-        <div class="assignment-list">
-          ${profile.agreements
-            .map(
-              (agreement) => `
-                <div class="agreement-row">
-                  <strong>${escapeHtml(agreement.name)}</strong>
-                  <span class="pill ${agreement.status === "Signed" ? "confirmed" : "attention"}">${escapeHtml(agreement.status)}</span>
-                </div>
-              `
-            )
-            .join("")}
-        </div>
-      </article>
     </section>
   `;
 }
 
 function routeView(route, dashboard) {
   if (route.startsWith("gig/")) return gigDetailView(dashboard, route.split("/")[1]);
-
-  const views = {
-    home: homeView,
-    gigs: gigsView,
-    calendar: calendarView,
-    assignments: assignmentsView,
-    profile: profileView
-  };
+  const views = { home: homeView, gigs: gigsView, calendar: calendarView, assignments: assignmentsView, profile: profileView };
   return views[route](dashboard);
+}
+
+function renderLogin(error = "") {
+  root.innerHTML = `
+    <main class="login-shell">
+      <form class="login-panel" data-login-form>
+        <div class="brand">
+          <div class="brand-mark">BL</div>
+          <div>
+            <p>Black Label</p>
+            <strong>Talent</strong>
+          </div>
+        </div>
+        <p class="mini-label">Talent login</p>
+        <h1>Welcome back.</h1>
+        <p>Sign in with the Supabase-authenticated talent account connected in Black Label Hub.</p>
+        ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
+        <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="button button-primary full-width" type="submit">Log in</button>
+      </form>
+    </main>
+  `;
 }
 
 function render(dashboard) {
   dashboardState = dashboard;
   const activeRoute = currentRoute();
-
   root.innerHTML = `
     <div class="app">
       <aside class="sidebar">
@@ -477,18 +467,38 @@ function render(dashboard) {
             <strong>Talent</strong>
           </div>
         </div>
-
-        <nav class="nav" aria-label="Talent portal navigation">
-          ${navMarkup(activeRoute)}
-        </nav>
+        <nav class="nav" aria-label="Talent portal navigation">${navMarkup(activeRoute)}</nav>
+        <button class="sign-out" type="button" data-action="sign-out">Sign out</button>
       </aside>
-
-      <main class="content">
-        ${routeView(activeRoute, dashboard)}
-      </main>
+      <main class="content">${routeView(activeRoute, dashboard)}</main>
     </div>
   `;
 }
+
+async function refreshDashboard(message) {
+  root.innerHTML = `<main class="loading">Loading Talent Portal...</main>`;
+  const auth = await getAuthState();
+  if (!auth.isAuthenticated) {
+    renderLogin();
+    return;
+  }
+  const dashboard = await getTalentDashboard();
+  render(dashboard);
+  if (message) renderToast(message);
+}
+
+root.addEventListener("submit", async (event) => {
+  const form = event.target.closest("[data-login-form]");
+  if (!form) return;
+  event.preventDefault();
+  const formData = new FormData(form);
+  try {
+    await signInWithPassword(formData.get("email"), formData.get("password"));
+    await refreshDashboard();
+  } catch (error) {
+    renderLogin(error.message);
+  }
+});
 
 root.addEventListener("click", async (event) => {
   const monthButton = event.target.closest("[data-calendar-shift]");
@@ -501,15 +511,28 @@ root.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-action]");
   if (!button) return;
 
-  const gigId = button.dataset.gigId;
-  if (button.dataset.action === "accept") {
-    await acceptGig(gigId);
-    renderToast("Gig accepted. Black Label admin still confirms the final booking.");
-  }
+  try {
+    if (button.dataset.action === "sign-out") {
+      await signOut();
+      renderLogin();
+      return;
+    }
 
-  if (button.dataset.action === "decline") {
-    await declineGig(gigId);
-    renderToast("Gig declined. It will be removed from your open opportunities after sync.");
+    const gigId = button.dataset.gigId;
+    if (button.dataset.action === "interested") {
+      await interestedGig(gigId);
+      await refreshDashboard("Marked interested. Black Label admin can see your response.");
+    }
+    if (button.dataset.action === "accept") {
+      await acceptGig(gigId);
+      await refreshDashboard("Gig accepted. Black Label admin still confirms the final booking.");
+    }
+    if (button.dataset.action === "decline") {
+      await declineGig(gigId);
+      await refreshDashboard("Gig declined. It has been removed from your open opportunities.");
+    }
+  } catch (error) {
+    renderToast(error.message || "That update did not go through.", "error");
   }
 });
 
@@ -517,8 +540,7 @@ globalThis.addEventListener("hashchange", () => {
   if (dashboardState) render(dashboardState);
 });
 
-root.innerHTML = `<main class="loading">Loading Talent Portal...</main>`;
-getTalentDashboard().then(render);
+refreshDashboard();
 
 if ("serviceWorker" in navigator) {
   globalThis.addEventListener("load", () => {
