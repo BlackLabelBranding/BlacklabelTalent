@@ -1,4 +1,4 @@
-const CACHE_NAME = "blacklabel-talent-v2";
+const CACHE_NAME = "blacklabel-talent-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,9 +7,7 @@ const APP_SHELL = [
   "./src/styles.css",
   "./src/live.css",
   "./src/data/mockData.js",
-  "./src/lib/hubApi.js",
-  "./icons/icon-192.svg",
-  "./icons/icon-512.svg"
+  "./src/lib/hubApi.js"
 ];
 
 self.addEventListener("install", (event) => {
