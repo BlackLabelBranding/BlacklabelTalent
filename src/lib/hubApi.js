@@ -5,7 +5,7 @@ export const SUPABASE_URL =
 
 export const SUPABASE_ANON_KEY =
   globalThis.BLACK_LABEL_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvcGN0dGtybWp2d2RkZGF3ZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNTQzNjgsImV4cCI6MjA3MTczMDM2OH0.5s1HHvDsDIgWw6TVR3YfhzJC9uEjcVfunRyMa6B7xYY";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InhvcGN0dGtybWp2d2RkZGF3ZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNTQzNjgsImV4cCI6MjA3MTczMDM2OH0.5s1HHvDsDIgWw6TVR3YfhzJC9uEjcVfunRyMa6B7xYY";
 
 const SESSION_KEY = "blacklabel.talent.session";
 const EMPTY_DASHBOARD = {
@@ -207,6 +207,18 @@ function inFilter(values) {
   return values.length ? `in.(${values.map(encodeURIComponent).join(",")})` : "in.()";
 }
 
+function cleanValue(value) {
+  const cleaned = String(value || "").trim();
+  return cleaned || null;
+}
+
+function listValue(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 async function fetchByIds(table, values) {
   if (!values.length) return [];
   return request(`/rest/v1/${table}?id=${inFilter(values)}&select=*`);
@@ -348,4 +360,76 @@ export function interestedGig(gigId) {
 
 export function declineGig(gigId) {
   return updateInvitationStatus(gigId, "declined");
+}
+
+export async function updateTalentProfile(formValues = {}) {
+  const dashboard = await getTalentDashboard();
+  const teamMemberId = dashboard.teamMember?.id;
+  if (!teamMemberId) throw new Error("No linked team member profile was found.");
+
+  const teamMemberUpdates = {
+    name: cleanValue(formValues.name),
+    phone: cleanValue(formValues.phone),
+    role: cleanValue(formValues.role)
+  };
+
+  const rosterProfileUpdates = {
+    profile_type: cleanValue(formValues.role),
+    profile_tier: cleanValue(formValues.profile_tier),
+    home_base: cleanValue(formValues.home_base),
+    height: cleanValue(formValues.height),
+    shirt_size: cleanValue(formValues.shirt_size),
+    shoe_size: cleanValue(formValues.shoe_size),
+    instagram: cleanValue(formValues.instagram),
+    tiktok: cleanValue(formValues.tiktok),
+    roles_accepted: listValue(formValues.roles_accepted),
+    not_available_for: listValue(formValues.not_available_for),
+    bio: cleanValue(formValues.bio)
+  };
+
+  const profiles = await request(`/rest/v1/roster_profiles?team_member_id=eq.${teamMemberId}&select=id&limit=1`);
+
+  await request(`/rest/v1/team_members?id=eq.${teamMemberId}`, {
+    method: "PATCH",
+    body: JSON.stringify(teamMemberUpdates)
+  });
+
+  if (profiles[0]?.id) {
+    await request(`/rest/v1/roster_profiles?id=eq.${profiles[0].id}&team_member_id=eq.${teamMemberId}`, {
+      method: "PATCH",
+      body: JSON.stringify(rosterProfileUpdates)
+    });
+  } else {
+    await request("/rest/v1/roster_profiles", {
+      method: "POST",
+      body: JSON.stringify({
+        team_member_id: teamMemberId,
+        profile_status: "active",
+        ...rosterProfileUpdates
+      })
+    });
+  }
+
+  return getTalentDashboard();
+}
+
+export async function createTalentAvailability(formValues = {}) {
+  const dashboard = await getTalentDashboard();
+  const teamMemberId = dashboard.teamMember?.id;
+  if (!teamMemberId) throw new Error("No linked team member profile was found.");
+  if (!formValues.starts_at || !formValues.ends_at) {
+    throw new Error("Start and end dates are required for availability.");
+  }
+
+  return request("/rest/v1/talent_availability", {
+    method: "POST",
+    body: JSON.stringify({
+      team_member_id: teamMemberId,
+      starts_at: formValues.starts_at,
+      ends_at: formValues.ends_at,
+      status: formValues.status || "unavailable",
+      notes: cleanValue(formValues.notes),
+      source: "talent_portal"
+    })
+  });
 }
