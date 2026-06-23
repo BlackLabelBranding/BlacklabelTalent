@@ -1,904 +1,689 @@
-:root {
-  color-scheme: dark;
-  --ink: #fff7ff;
-  --muted: #c9a8cf;
-  --dim: #8b7892;
-  --black: #050207;
-  --black-2: #0c0612;
-  --panel: rgba(18, 8, 28, 0.82);
-  --panel-strong: rgba(31, 10, 47, 0.92);
-  --line: rgba(255, 78, 216, 0.22);
-  --line-strong: rgba(255, 78, 216, 0.48);
-  --fuchsia: #ff2bd6;
-  --pink: #ff4fae;
-  --purple: #9b5cff;
-  --violet: #6b2cff;
-  --cyan: #18f3ff;
-  --green: #43ff9b;
-  --gold: #ffd166;
-  --shadow: 0 24px 80px rgba(255, 43, 214, 0.18);
-  --glow: 0 0 24px rgba(255, 43, 214, 0.58), 0 0 55px rgba(155, 92, 255, 0.28);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 16% 12%, rgba(255, 43, 214, 0.34), transparent 28%),
-    radial-gradient(circle at 82% 8%, rgba(107, 44, 255, 0.32), transparent 30%),
-    radial-gradient(circle at 65% 86%, rgba(24, 243, 255, 0.14), transparent 28%),
-    linear-gradient(135deg, #020103 0%, #08030d 42%, #12051f 100%);
-  color: var(--ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 54px 54px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 82%);
-}
-
-button,
-input {
-  font: inherit;
-}
-
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button {
-  cursor: pointer;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-.loading {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.app {
-  position: relative;
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  padding: 24px 20px;
-  background: rgba(4, 2, 7, 0.88);
-  border-right: 1px solid var(--line);
-  color: #fff;
-  backdrop-filter: blur(18px);
-  z-index: 2;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 34px;
-}
-
-.brand-mark {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: linear-gradient(135deg, var(--fuchsia), var(--purple));
-  color: #fff;
-  font-weight: 950;
-  box-shadow: var(--glow);
-}
-
-.brand p {
-  margin-bottom: 3px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.brand strong {
-  font-size: 20px;
-  letter-spacing: 0;
-  text-shadow: 0 0 16px rgba(255, 79, 174, 0.55);
-}
-
-.nav {
-  display: grid;
-  gap: 8px;
-}
-
-.nav a {
-  position: relative;
-  padding: 13px 14px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 900;
-  transition: 180ms ease;
-}
-
-.nav a:hover,
-.nav a.active {
-  border-color: var(--line-strong);
-  background: linear-gradient(90deg, rgba(255, 43, 214, 0.18), rgba(155, 92, 255, 0.08));
-  color: #fff;
-  box-shadow: 0 0 24px rgba(255, 43, 214, 0.18);
-}
-
-.content {
-  min-width: 0;
-  padding: 30px;
-}
-
-.hero {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 26px;
-  min-height: 430px;
-  padding: 40px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background:
-    linear-gradient(90deg, rgba(5, 2, 7, 0.92), rgba(5, 2, 7, 0.48)),
-    url("https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1700&q=80");
-  background-position: center;
-  background-size: cover;
-  box-shadow: var(--shadow);
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: auto -18% -35% 24%;
-  height: 220px;
-  background: radial-gradient(circle, rgba(255, 43, 214, 0.45), transparent 62%);
-  filter: blur(18px);
-  pointer-events: none;
-}
-
-.hero > * {
-  position: relative;
-  z-index: 1;
-}
-
-.mini-label {
-  margin-bottom: 8px;
-  color: var(--pink);
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.hero h1,
-.page-head h1 {
-  max-width: 780px;
-  margin-bottom: 14px;
-  font-size: clamp(42px, 7vw, 86px);
-  line-height: 0.92;
-  letter-spacing: 0;
-  text-shadow: 0 0 24px rgba(255, 43, 214, 0.48);
-}
-
-.hero-copy,
-.page-head p {
-  max-width: 620px;
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.55;
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 22px;
-}
-
-.profile-chip {
-  min-width: 245px;
-  padding: 16px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: rgba(10, 4, 16, 0.68);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 0 30px rgba(155, 92, 255, 0.22);
-}
-
-.profile-chip span {
-  display: block;
-  margin-bottom: 7px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.profile-chip strong {
-  font-size: 19px;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 13px 15px;
-  border: 1px solid rgba(67, 255, 155, 0.45);
-  background: rgba(67, 255, 155, 0.12);
-  color: var(--green);
-  border-radius: 8px;
-  font-weight: 900;
-  box-shadow: 0 0 24px rgba(67, 255, 155, 0.16);
-}
-
-.page-head {
-  margin-bottom: 22px;
-  padding: 12px 0 8px;
-}
-
-.page-head h1 {
-  font-size: clamp(38px, 6vw, 72px);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 18px 0;
-}
-
-.stat,
-.panel,
-.gig-card,
-.assignment-row {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.26);
-  backdrop-filter: blur(16px);
-}
-
-.stat {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 7px 11px;
-  align-items: center;
-  padding: 17px;
-}
-
-.stat-icon,
-.panel-icon {
-  color: var(--cyan);
-  font-weight: 950;
-  font-size: 12px;
-  text-shadow: 0 0 14px rgba(24, 243, 255, 0.68);
-}
-
-.stat span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.stat strong {
-  grid-column: 1 / -1;
-  color: #fff;
-  font-size: 20px;
-}
-
-.home-grid,
-.profile-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
-  gap: 18px;
-  align-items: start;
-}
-
-.panel {
-  padding: 20px;
-}
-
-.section-head {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.section-head h2 {
-  margin-bottom: 0;
-  color: #fff;
-  font-size: 26px;
-  letter-spacing: 0;
-}
-
-.count-pill,
-.pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 25px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 950;
-  white-space: nowrap;
-}
-
-.pill.open {
-  border-color: rgba(67, 255, 155, 0.32);
-  background: rgba(67, 255, 155, 0.12);
-  color: var(--green);
-}
-
-.pill.confirmed {
-  border-color: rgba(24, 243, 255, 0.32);
-  background: rgba(24, 243, 255, 0.11);
-  color: var(--cyan);
-}
-
-.pill.attention {
-  border-color: rgba(255, 79, 174, 0.42);
-  background: rgba(255, 79, 174, 0.13);
-  color: var(--pink);
-}
-
-.gig-list,
-.assignment-list {
-  display: grid;
-  gap: 14px;
-}
-
-.page-list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.gig-card {
-  position: relative;
-  overflow: hidden;
-  padding: 17px;
-  transition: 180ms ease;
-}
-
-.gig-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 43, 214, 0.13), transparent 44%);
-  opacity: 0;
-  transition: 180ms ease;
-  pointer-events: none;
-}
-
-.gig-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--line-strong);
-  box-shadow: var(--glow);
-}
-
-.gig-card:hover::before,
-.featured-gig::before {
-  opacity: 1;
-}
-
-.gig-card__top,
-.assignment-row,
-.gig-actions,
-.assignment-status {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.gig-card h3,
-.assignment-row h3,
-.next-panel h3 {
-  margin-bottom: 5px;
-  color: #fff;
-  font-size: 20px;
-}
-
-.gig-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 13px 0;
-}
-
-.gig-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.gig-note,
-.next-panel p,
-.profile-panel p {
-  margin-bottom: 13px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.deliverables {
-  padding: 12px;
-  border: 1px solid rgba(155, 92, 255, 0.24);
-  border-radius: 8px;
-  background: rgba(155, 92, 255, 0.1);
-}
-
-.deliverables span {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--pink);
-  font-size: 11px;
-  font-weight: 950;
-  text-transform: uppercase;
-}
-
-.deliverables p {
-  margin-bottom: 0;
-  color: #fff;
-  font-size: 14px;
-}
-
-.gig-actions {
-  justify-content: flex-start;
-  margin-top: 14px;
-}
-
-.button {
-  min-height: 43px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-weight: 950;
-  transition: 180ms ease;
-}
-
-.button:hover {
-  transform: translateY(-1px);
-}
-
-.button-primary {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, var(--fuchsia), var(--purple));
-  color: #fff;
-  box-shadow: 0 0 24px rgba(255, 43, 214, 0.32);
-}
-
-.button-secondary {
-  border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-
-.button-secondary.glass {
-  background: rgba(5, 2, 7, 0.42);
-  backdrop-filter: blur(10px);
-}
-
-.full-width {
-  width: 100%;
-}
-
-.calendar-panel {
-  max-width: 1180px;
-}
-
-.calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.legend-dot {
-  width: 9px;
-  height: 9px;
-  display: inline-block;
-  margin-right: 6px;
-  border-radius: 99px;
-}
-
-.legend-dot.open {
-  background: var(--green);
-}
-
-.legend-dot.confirmed {
-  background: var(--cyan);
-}
-
-.legend-dot.blocked {
-  background: var(--pink);
-}
-
-.weekday-grid,
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-.weekday-grid {
-  margin-bottom: 8px;
-  color: var(--dim);
-  font-size: 11px;
-  font-weight: 950;
-  text-align: center;
-}
-
-.month-grid {
-  gap: 9px;
-}
-
-.calendar-day {
-  min-height: 112px;
-  padding: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--dim);
-  text-align: left;
-  transition: 180ms ease;
-}
-
-.calendar-day:hover {
-  transform: translateY(-2px);
-  border-color: var(--line-strong);
-}
-
-.calendar-day strong,
-.calendar-day span,
-.calendar-day small {
-  display: block;
-}
-
-.calendar-day strong {
-  color: #fff;
-  font-size: 15px;
-}
-
-.calendar-day span {
-  margin-top: 18px;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-.calendar-day small {
-  margin-top: 3px;
-  font-size: 11px;
-  line-height: 1.25;
-}
-
-.calendar-day.open {
-  border-color: rgba(67, 255, 155, 0.36);
-  background: rgba(67, 255, 155, 0.1);
-  color: var(--green);
-}
-
-.calendar-day.confirmed {
-  border-color: rgba(24, 243, 255, 0.34);
-  background: rgba(24, 243, 255, 0.1);
-  color: var(--cyan);
-}
-
-.calendar-day.blocked {
-  border-color: rgba(255, 79, 174, 0.4);
-  background: rgba(255, 79, 174, 0.12);
-  color: var(--pink);
-}
-
-.assignment-row {
-  padding: 16px;
-}
-
-.assignment-row span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.assignment-status {
-  align-items: end;
-  flex-direction: column;
-}
-
-.back-link {
-  display: inline-flex;
-  margin-bottom: 16px;
-  color: var(--cyan);
-  font-size: 13px;
-  font-weight: 950;
-  text-transform: uppercase;
-  text-shadow: 0 0 14px rgba(24, 243, 255, 0.55);
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-  gap: 18px;
-  align-items: start;
-}
-
-.detail-list {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.detail-list.compact {
-  gap: 8px;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 11px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.detail-row span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.detail-row strong {
-  color: #fff;
-  font-size: 13px;
-  text-align: right;
-}
-
-.detail-deliverables {
-  margin-top: 12px;
-}
-
-.detail-side {
-  position: sticky;
-  top: 30px;
-}
-
-.stacked {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.chip-list span {
-  padding: 9px 11px;
-  border: 1px solid rgba(255, 79, 174, 0.34);
-  border-radius: 999px;
-  background: rgba(255, 79, 174, 0.11);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-.chip-list.muted span {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--muted);
-}
-
-.profile-subhead {
-  margin-top: 8px;
-}
-
-.agreements-panel {
-  grid-column: 1 / -1;
-}
-
-.agreement-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 13px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.agreement-row strong {
-  color: #fff;
-}
-
-@media (max-width: 1180px) {
-  .app {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 14px 16px;
-  }
-
-  .brand {
-    margin-bottom: 0;
-  }
-
-  .nav {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .nav a {
-    white-space: nowrap;
-  }
-
-  .home-grid,
-  .profile-grid,
-  .page-list,
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-side {
-    position: static;
+```js
+import {
+  acceptGig,
+  declineGig,
+  getAuthState,
+  getTalentDashboard,
+  interestedGig,
+  signInWithPassword,
+  signOut,
+  SUPABASE_ANON_KEY,
+  SUPABASE_URL
+} from "./lib/hubApi.js";
+
+const root = document.querySelector("#root");
+const SESSION_KEY = "blacklabel.talent.session";
+
+const icons = {
+  calendar: "CAL",
+  pay: "$",
+  contract: "DOC",
+  location: "PIN",
+  person: "ROLE",
+  check: "OK"
+};
+
+const routes = {
+  home: "Home",
+  gigs: "Open Gigs",
+  calendar: "Calendar",
+  assignments: "My Gigs",
+  profile: "Profile"
+};
+
+const statusTone = {
+  Open: "open",
+  Sent: "open",
+  Viewed: "open",
+  Interested: "hold",
+  Accepted: "confirmed",
+  Assigned: "confirmed",
+  Confirmed: "confirmed",
+  Signed: "confirmed",
+  "Needs signature": "attention",
+  "Pending completion": "attention",
+  Pending: "attention"
+};
+
+let dashboardState = null;
+let activeCalendarMonth = monthKeyFromDate(new Date());
+
+function readSession() {
+  try {
+    const value = localStorage.getItem(SESSION_KEY);
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
   }
 }
 
-@media (max-width: 760px) {
-  .content {
-    padding: 16px 16px calc(96px + env(safe-area-inset-bottom));
-  }
-
-  .sidebar {
-    position: fixed;
-    inset: auto 0 0 0;
-    height: auto;
-    align-items: stretch;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--line);
-    border-right: 0;
-    background: rgba(5, 2, 7, 0.94);
-  }
-
-  .brand {
-    display: none;
-  }
-
-  .nav {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
-    overflow: visible;
-  }
-
-  .nav a {
-    min-height: 54px;
-    display: grid;
-    place-items: center;
-    padding: 8px 5px;
-    border-radius: 12px;
-    font-size: 11px;
-    text-align: center;
-    white-space: normal;
-  }
-
-  .hero {
-    align-items: start;
-    flex-direction: column;
-    min-height: 470px;
-    padding: 24px;
-  }
-
-  .hero h1,
-  .page-head h1 {
-    font-size: 43px;
-  }
-
-  .profile-chip {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .section-head,
-  .gig-card__top,
-  .assignment-row,
-  .assignment-status {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .gig-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .weekday-grid {
-    display: none;
-  }
-
-  .month-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .calendar-day {
-    min-height: auto;
-  }
-
-  .detail-row {
-    align-items: start;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .detail-row strong {
-    text-align: left;
-  }
+function authHeaders(session = readSession()) {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+    "Content-Type": "application/json"
+  };
 }
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...authHeaders(options.session),
+      Prefer: options.prefer || "return=representation",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Supabase request failed with ${response.status}`);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+function commaList(value = "") {
+  return String(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+async function updateTalentProfile(formValues = {}) {
+  const dashboard = await getTalentDashboard();
+
+  if (!dashboard.teamMember?.id) {
+    throw new Error("No linked team member profile was found.");
+  }
+
+  await supabaseRequest(`/rest/v1/team_members?id=eq.${dashboard.teamMember.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      name: formValues.name || null,
+      phone: formValues.phone || null,
+      role: formValues.role || null
+    })
+  });
+
+  const rosterPayload = {
+    team_member_id: dashboard.teamMember.id,
+    home_base: formValues.home_base || null,
+    profile_tier: formValues.profile_tier || null,
+    height: formValues.height || null,
+    shirt_size: formValues.shirt_size || null,
+    shoe_size: formValues.shoe_size || null,
+    instagram: formValues.instagram || null,
+    tiktok: formValues.tiktok || null,
+    roles_accepted: commaList(formValues.roles_accepted),
+    not_available_for: commaList(formValues.not_available_for),
+    bio: formValues.bio || null
+  };
+
+  const existingProfiles = await supabaseRequest(
+    `/rest/v1/roster_profiles?team_member_id=eq.${dashboard.teamMember.id}&select=id&limit=1`
+  );
+
+  if (existingProfiles?.[0]?.id) {
+    return supabaseRequest(`/rest/v1/roster_profiles?id=eq.${existingProfiles[0].id}`, {
+      method: "PATCH",
+      body: JSON.stringify(rosterPayload)
+    });
+  }
+
+  return supabaseRequest("/rest/v1/roster_profiles", {
+    method: "POST",
+    body: JSON.stringify(rosterPayload)
+  });
+}
+
+async function createTalentAvailability(formValues = {}) {
+  const dashboard = await getTalentDashboard();
+
+  if (!dashboard.teamMember?.id) {
+    throw new Error("No linked team member profile was found.");
+  }
+
+  return supabaseRequest("/rest/v1/talent_availability", {
+    method: "POST",
+    body: JSON.stringify({
+      team_member_id: dashboard.teamMember.id,
+      starts_at: formValues.starts_at ? new Date(formValues.starts_at).toISOString() : null,
+      ends_at: formValues.ends_at ? new Date(formValues.ends_at).toISOString() : null,
+      status: formValues.status || "unavailable",
+      notes: formValues.notes || null,
+      source: "talent_portal"
+    })
+  });
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function currentRoute() {
+  const hash = globalThis.location.hash.replace("#", "");
+  if (hash.startsWith("gig/")) return hash;
+  return routes[hash] ? hash : "home";
+}
+
+function navMarkup(activeRoute) {
+  const normalizedRoute = activeRoute.startsWith("gig/") ? "gigs" : activeRoute;
+  return Object.entries(routes)
+    .map(([route, label]) => `<a href="#${route}" class="${route === normalizedRoute ? "active" : ""}">${label}</a>`)
+    .join("");
+}
+
+function stat(icon, label, value) {
+  return `
+    <div class="stat">
+      <span class="stat-icon" aria-hidden="true">${icon}</span>
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `;
+}
+
+function emptyState(title, copy, action = "") {
+  return `
+    <article class="empty-state">
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(copy)}</p>
+      ${action}
+    </article>
+  `;
+}
+
+function gigCard(gig, featured = false) {
+  const tone = statusTone[gig.status] || "neutral";
+  return `
+    <article class="gig-card ${featured ? "featured-gig" : ""}">
+      <div class="gig-card__top">
+        <div>
+          <p class="mini-label">${escapeHtml(gig.date)}</p>
+          <h3>${escapeHtml(gig.title)}</h3>
+        </div>
+        <span class="pill ${tone}">${escapeHtml(gig.status)}</span>
+      </div>
+      <div class="gig-meta">
+        <span>${icons.person} ${escapeHtml(gig.role)}</span>
+        <span>${icons.location} ${escapeHtml(gig.location)}</span>
+        <span>${icons.pay} ${escapeHtml(gig.pay)}</span>
+      </div>
+      <p class="gig-note">${escapeHtml(gig.requirements)}</p>
+      <div class="deliverables">
+        <span>Deliverables</span>
+        <p>${escapeHtml(gig.deliverables)}</p>
+      </div>
+      <div class="gig-actions">
+        <a class="button button-secondary" href="#gig/${escapeHtml(gig.id)}">View details</a>
+        <button class="button button-secondary" type="button" data-action="interested" data-gig-id="${escapeHtml(gig.id)}">Interested</button>
+        <button class="button button-primary" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">Accept</button>
+        <button class="button button-secondary" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">Decline</button>
+      </div>
+    </article>
+  `;
+}
+
+function assignmentRow(assignment) {
+  const contractTone = statusTone[assignment.contractStatus] || "neutral";
+  const paymentTone = statusTone[assignment.paymentStatus] || "neutral";
+  return `
+    <article class="assignment-row">
+      <div>
+        <p class="mini-label">${escapeHtml(assignment.date)}</p>
+        <h3>${escapeHtml(assignment.title)}</h3>
+        <span>${escapeHtml(assignment.role)} &middot; ${escapeHtml(assignment.location)} &middot; ${escapeHtml(assignment.pay)}</span>
+      </div>
+      <div class="assignment-status">
+        <span class="pill ${contractTone}">${escapeHtml(assignment.contractStatus)}</span>
+        <span class="pill ${paymentTone}">${escapeHtml(assignment.paymentStatus)}</span>
+      </div>
+    </article>
+  `;
+}
+
+function parseMonth(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return { year, month };
+}
+
+function monthKeyFromDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function shiftMonth(monthKey, amount) {
+  const { year, month } = parseMonth(monthKey);
+  return monthKeyFromDate(new Date(year, month - 1 + amount, 1));
+}
+
+function monthTitle(monthKey) {
+  const { year, month } = parseMonth(monthKey);
+  return new Date(year, month - 1, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function talentCalendar(days) {
+  const { year, month } = parseMonth(activeCalendarMonth);
+  const firstDay = new Date(year, month - 1, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const leadingBlanks = (firstDay.getDay() + 6) % 7;
+  const visibleDays = days.filter((day) => day.date.startsWith(activeCalendarMonth));
+  const dayMap = new Map(visibleDays.map((day) => [Number(day.date.slice(-2)), day]));
+  const totalCells = Math.ceil((leadingBlanks + daysInMonth) / 7) * 7;
+
+  const dayButtons = Array.from({ length: totalCells }, (_, index) => {
+    const date = index - leadingBlanks + 1;
+    if (date < 1 || date > daysInMonth) return `<div class="calendar-day empty" aria-hidden="true"></div>`;
+    const item = dayMap.get(date);
+    return `
+      <button class="calendar-day ${item ? escapeHtml(item.tone) : ""}" type="button">
+        <strong>${date}</strong>
+        ${item ? `<span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.title)}</small>` : "<small>Open date</small>"}
+      </button>
+    `;
+  }).join("");
+
+  return `
+    <section class="panel calendar-panel" aria-label="Talent calendar">
+      <div class="section-head">
+        <div>
+          <p class="mini-label">Your month</p>
+          <h2>${escapeHtml(monthTitle(activeCalendarMonth))}</h2>
+        </div>
+        <div class="calendar-controls" aria-label="Month controls">
+          <button class="icon-button" type="button" data-calendar-shift="-1">Prev</button>
+          <span class="count-pill">${visibleDays.length} marked dates</span>
+          <button class="icon-button" type="button" data-calendar-shift="1">Next</button>
+        </div>
+      </div>
+      <div class="calendar-legend">
+        <span><i class="legend-dot open"></i>Open gig</span>
+        <span><i class="legend-dot hold"></i>Interested / hold</span>
+        <span><i class="legend-dot confirmed"></i>Booked</span>
+        <span><i class="legend-dot blocked"></i>Unavailable</span>
+      </div>
+      <div class="weekday-grid" aria-hidden="true">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+      </div>
+      <div class="month-grid">${dayButtons}</div>
+    </section>
+  `;
+}
+
+function renderToast(message, tone = "success") {
+  const existing = document.querySelector(".toast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.className = `toast ${tone}`;
+  toast.setAttribute("role", "status");
+  toast.innerHTML = `<span aria-hidden="true">${icons.check}</span>${escapeHtml(message)}`;
+  document.querySelector(".content")?.prepend(toast);
+}
+
+function detailRow(label, value) {
+  return `
+    <div class="detail-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `;
+}
+
+function homeView({ profile, openGigs, assignments }) {
+  const nextGig = assignments[0];
+  return `
+    <section class="hero">
+      <div>
+        <p class="mini-label">Black Label Talent</p>
+        <h1>Book the gig. Own the night.</h1>
+        <p class="hero-copy">Your gigs, contracts, pay, and availability in one place.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#gigs">See open gigs</a>
+          <a class="button button-secondary glass" href="#calendar">Open calendar</a>
+        </div>
+      </div>
+      <div class="profile-chip">
+        <span>${escapeHtml(profile.role)}</span>
+        <strong>${escapeHtml(profile.status)}</strong>
+      </div>
+    </section>
+    <section class="stats-grid" aria-label="Talent summary">
+      ${stat(icons.calendar, "Next gig", profile.nextGig)}
+      ${stat(icons.pay, "Pending pay", profile.payPending)}
+      ${stat(icons.contract, "Talent status", profile.rating)}
+    </section>
+    <div class="home-grid">
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <p class="mini-label">Hot call</p>
+            <h2>Featured Opportunity</h2>
+          </div>
+          <span class="count-pill">${openGigs.length} live</span>
+        </div>
+        ${openGigs[0] ? gigCard(openGigs[0], true) : emptyState("No open gigs yet", "New invitations from Black Label Hub will appear here as soon as they are sent.")}
+      </section>
+      <section class="panel next-panel">
+        <div class="section-head">
+          <div>
+            <p class="mini-label">Next up</p>
+            <h2>Booked Status</h2>
+          </div>
+          <span class="pill attention">${escapeHtml(nextGig?.contractStatus || "No active booking")}</span>
+        </div>
+        ${nextGig ? `<h3>${escapeHtml(nextGig.title)}</h3><p>${escapeHtml(nextGig.role)} in ${escapeHtml(nextGig.location)}. Pay is ${escapeHtml(nextGig.pay)}.</p>` : `<p>You do not have a confirmed gig yet. Accepted opportunities move here after admin confirmation.</p>`}
+        <a class="button button-secondary full-width" href="#assignments">View my gigs</a>
+      </section>
+    </div>
+  `;
+}
+
+function gigsView({ openGigs }) {
+  return `
+    <section class="page-head">
+      <p class="mini-label">Opportunities</p>
+      <h1>Open Gigs</h1>
+      <p>Accept only the roles and requirements that fit you. Admin confirms final booking from Black Label Hub.</p>
+    </section>
+    <section class="gig-list page-list">
+      ${openGigs.length ? openGigs.map((gig) => gigCard(gig)).join("") : emptyState("No open invitations", "You are connected to live Supabase data. Open opportunities will appear here after Hub sends them.")}
+    </section>
+  `;
+}
+
+function gigDetailView(dashboard, gigId) {
+  const gig = dashboard.openGigs.find((item) => item.id === gigId);
+  if (!gig) {
+    return `
+      <section class="page-head">
+        <p class="mini-label">Gig detail</p>
+        <h1>Gig not found</h1>
+        <p>This opportunity may have been filled, declined, or removed.</p>
+        <a class="button button-primary" href="#gigs">Back to open gigs</a>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="page-head detail-head">
+      <a class="back-link" href="#gigs">Back to open gigs</a>
+      <p class="mini-label">${escapeHtml(gig.role)}</p>
+      <h1>${escapeHtml(gig.title)}</h1>
+      <p>${escapeHtml(gig.requirements)}</p>
+    </section>
+    <section class="detail-grid">
+      <article class="panel detail-main">
+        <div class="section-head">
+          <div>
+            <p class="mini-label">Gig details</p>
+            <h2>${escapeHtml(gig.date)}</h2>
+          </div>
+          <span class="pill ${statusTone[gig.status] || "open"}">${escapeHtml(gig.status)}</span>
+        </div>
+        <div class="detail-list">
+          ${detailRow("Time", gig.time)}
+          ${detailRow("Location", gig.location)}
+          ${detailRow("Pay", gig.pay)}
+          ${detailRow("Dress code", gig.dressCode)}
+          ${detailRow("Manual labor required", gig.manualLabor)}
+          ${detailRow("Content required", gig.contentRequired)}
+          ${detailRow("Appearance required", gig.appearanceRequired)}
+          ${detailRow("Contract", gig.contractStatus)}
+        </div>
+        <div class="deliverables detail-deliverables">
+          <span>Deliverables</span>
+          <p>${escapeHtml(gig.deliverables)}</p>
+        </div>
+      </article>
+      <aside class="panel detail-side">
+        <p class="mini-label">Notes from Black Label</p>
+        <h2>Before you accept</h2>
+        <p>${escapeHtml(gig.notes)}</p>
+        <div class="gig-actions stacked">
+          <button class="button button-secondary full-width" type="button" data-action="interested" data-gig-id="${escapeHtml(gig.id)}">Mark interested</button>
+          <button class="button button-primary full-width" type="button" data-action="accept" data-gig-id="${escapeHtml(gig.id)}">Accept this gig</button>
+          <button class="button button-secondary full-width" type="button" data-action="decline" data-gig-id="${escapeHtml(gig.id)}">Decline</button>
+        </div>
+      </aside>
+    </section>
+  `;
+}
+
+function calendarView({ calendarDays }) {
+  return `
+    <section class="page-head">
+      <p class="mini-label">Calendar</p>
+      <h1>Dates, holds, and bookings</h1>
+      <p>This is the talent-facing version of the master event calendar. Black Label Hub controls bookings; you control your availability windows.</p>
+    </section>
+    ${talentCalendar(calendarDays)}
+  `;
+}
+
+function assignmentsView({ assignments }) {
+  return `
+    <section class="page-head">
+      <p class="mini-label">Booked work</p>
+      <h1>My Gigs</h1>
+      <p>Track confirmed work, contracts, and payment status.</p>
+    </section>
+    <section class="panel">
+      <div class="assignment-list">
+        ${assignments.length ? assignments.map(assignmentRow).join("") : emptyState("No confirmed gigs", "Accepted opportunities will move here once Black Label admin confirms an assignment.")}
+      </div>
+    </section>
+  `;
+}
+
+function profileView({ profile, user, teamMember }) {
+  return `
+    <section class="page-head">
+      <p class="mini-label">Profile</p>
+      <h1>${escapeHtml(profile.name)}</h1>
+      <p>Update your talent profile and availability. Changes write back to the same Hub tables.</p>
+    </section>
+    ${teamMember ? "" : emptyState("No linked team member", "This login is valid, but it is not linked to a team_members row yet. Add this user's auth id or email in Hub to activate the portal.")}
+    <section class="profile-grid editable-profile-grid">
+      <article class="panel profile-panel wide-panel">
+        <p class="mini-label">Edit profile</p>
+        <h2>Your booking profile</h2>
+        <form class="talent-form" data-profile-form>
+          <label>Name<input name="name" value="${escapeHtml(profile.name)}" /></label>
+          <label>Phone<input name="phone" value="${escapeHtml(profile.phone === "Not set" ? "" : profile.phone)}" /></label>
+          <label>Primary role<input name="role" value="${escapeHtml(profile.role)}" /></label>
+          <label>Home base<input name="home_base" value="${escapeHtml(profile.city === "Not set" ? "" : profile.city)}" /></label>
+          <label>Talent tier<input name="profile_tier" value="${escapeHtml(profile.rating === "Roster" ? "" : profile.rating)}" /></label>
+          <label>Height<input name="height" value="${escapeHtml(profile.sizes.height === "Not set" ? "" : profile.sizes.height)}" /></label>
+          <label>Shirt<input name="shirt_size" value="${escapeHtml(profile.sizes.shirt === "Not set" ? "" : profile.sizes.shirt)}" /></label>
+          <label>Shoe<input name="shoe_size" value="${escapeHtml(profile.sizes.shoe === "Not set" ? "" : profile.sizes.shoe)}" /></label>
+          <label>Instagram<input name="instagram" value="${escapeHtml(profile.socials.instagram === "Not set" ? "" : profile.socials.instagram)}" /></label>
+          <label>TikTok<input name="tiktok" value="${escapeHtml(profile.socials.tiktok === "Not set" ? "" : profile.socials.tiktok)}" /></label>
+          <label class="full-field">Roles accepted<input name="roles_accepted" value="${escapeHtml(profile.roles.join(", "))}" placeholder="Model, Brand Ambassador, Influencer" /></label>
+          <label class="full-field">Not available for<input name="not_available_for" value="${escapeHtml(profile.notAvailableFor.join(", "))}" placeholder="Heavy setup, late nights, travel" /></label>
+          <label class="full-field">Bio<textarea name="bio">${escapeHtml(profile.bio)}</textarea></label>
+          <button class="button button-primary" type="submit">Save profile</button>
+        </form>
+      </article>
+      <article class="panel profile-panel">
+        <p class="mini-label">Availability</p>
+        <h2>Block or open dates</h2>
+        <form class="talent-form compact-form" data-availability-form>
+          <label>Start<input name="starts_at" type="datetime-local" required /></label>
+          <label>End<input name="ends_at" type="datetime-local" required /></label>
+          <label>Status<select name="status"><option value="available">Available</option><option value="preferred">Preferred</option><option value="tentative">Tentative</option><option value="unavailable">Unavailable</option><option value="vacation">Vacation</option></select></label>
+          <label class="full-field">Notes<textarea name="notes" placeholder="Vacation, unavailable after 5 PM, preferred window, etc."></textarea></label>
+          <button class="button button-secondary full-width" type="submit">Save availability</button>
+        </form>
+      </article>
+      <article class="panel profile-panel">
+        <p class="mini-label">Contact</p>
+        <h2>${escapeHtml(profile.role)}</h2>
+        <div class="detail-list compact">
+          ${detailRow("Email", profile.email || user?.email || "")}
+          ${detailRow("Phone", profile.phone)}
+          ${detailRow("Talent tier", profile.rating)}
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+function routeView(route, dashboard) {
+  if (route.startsWith("gig/")) return gigDetailView(dashboard, route.split("/")[1]);
+  const views = { home: homeView, gigs: gigsView, calendar: calendarView, assignments: assignmentsView, profile: profileView };
+  return views[route](dashboard);
+}
+
+function renderLogin(error = "") {
+  root.innerHTML = `
+    <main class="login-shell">
+      <form class="login-panel" data-login-form>
+        <div class="brand">
+          <div class="brand-mark">BL</div>
+          <div>
+            <p>Black Label</p>
+            <strong>Talent</strong>
+          </div>
+        </div>
+        <p class="mini-label">Talent login</p>
+        <h1>Welcome back.</h1>
+        <p>Sign in with the Supabase-authenticated talent account connected in Black Label Hub.</p>
+        ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
+        <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="button button-primary full-width" type="submit">Log in</button>
+      </form>
+    </main>
+  `;
+}
+
+function render(dashboard) {
+  dashboardState = dashboard;
+  const activeRoute = currentRoute();
+  root.innerHTML = `
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">BL</div>
+          <div>
+            <p>Black Label</p>
+            <strong>Talent</strong>
+          </div>
+        </div>
+        <nav class="nav" aria-label="Talent portal navigation">${navMarkup(activeRoute)}</nav>
+        <button class="sign-out" type="button" data-action="sign-out">Sign out</button>
+      </aside>
+      <main class="content">${routeView(activeRoute, dashboard)}</main>
+    </div>
+  `;
+}
+
+async function refreshDashboard(message) {
+  root.innerHTML = `<main class="loading">Loading Talent Portal...</main>`;
+  const auth = await getAuthState();
+  if (!auth.isAuthenticated) {
+    renderLogin();
+    return;
+  }
+  const dashboard = await getTalentDashboard();
+  render(dashboard);
+  if (message) renderToast(message);
+}
+
+root.addEventListener("submit", async (event) => {
+  const loginForm = event.target.closest("[data-login-form]");
+  if (loginForm) {
+    event.preventDefault();
+    const formData = new FormData(loginForm);
+    try {
+      await signInWithPassword(formData.get("email"), formData.get("password"));
+      await refreshDashboard();
+    } catch (error) {
+      renderLogin(error.message);
+    }
+    return;
+  }
+
+  const profileForm = event.target.closest("[data-profile-form]");
+  if (profileForm) {
+    event.preventDefault();
+    const formData = new FormData(profileForm);
+    try {
+      await updateTalentProfile(Object.fromEntries(formData.entries()));
+      await refreshDashboard("Profile saved to Black Label Hub.");
+    } catch (error) {
+      renderToast(error.message || "Profile update failed.", "error");
+    }
+    return;
+  }
+
+  const availabilityForm = event.target.closest("[data-availability-form]");
+  if (availabilityForm) {
+    event.preventDefault();
+    const formData = new FormData(availabilityForm);
+    try {
+      await createTalentAvailability(Object.fromEntries(formData.entries()));
+      await refreshDashboard("Availability saved to your calendar.");
+    } catch (error) {
+      renderToast(error.message || "Availability update failed.", "error");
+    }
+  }
+});
+
+root.addEventListener("click", async (event) => {
+  const monthButton = event.target.closest("[data-calendar-shift]");
+  if (monthButton) {
+    activeCalendarMonth = shiftMonth(activeCalendarMonth, Number(monthButton.dataset.calendarShift));
+    if (dashboardState) render(dashboardState);
+    return;
+  }
+
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+
+  try {
+    if (button.dataset.action === "sign-out") {
+      await signOut();
+      renderLogin();
+      return;
+    }
+
+    const gigId = button.dataset.gigId;
+    if (button.dataset.action === "interested") {
+      await interestedGig(gigId);
+      await refreshDashboard("Marked interested. Black Label admin can see your response.");
+    }
+    if (button.dataset.action === "accept") {
+      await acceptGig(gigId);
+      await refreshDashboard("Gig accepted. Black Label admin still confirms the final booking.");
+    }
+    if (button.dataset.action === "decline") {
+      await declineGig(gigId);
+      await refreshDashboard("Gig declined. It has been removed from your open opportunities.");
+    }
+  } catch (error) {
+    renderToast(error.message || "That update did not go through.", "error");
+  }
+});
+
+globalThis.addEventListener("hashchange", () => {
+  if (dashboardState) render(dashboardState);
+});
+
+refreshDashboard();
+
+if ("serviceWorker" in navigator) {
+  globalThis.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+```
