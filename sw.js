@@ -1,8 +1,13 @@
-const CACHE_NAME = "blacklabel-talent-v3";
+const CACHE_NAME = "blacklabel-talent-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./favicon.ico",
   "./manifest.webmanifest",
+  "./icons/favicon.ico",
+  "./icons/favicon-16.png",
+  "./icons/favicon-32.png",
+  "./icons/icon-192.png",
   "./src/app.js",
   "./src/styles.css",
   "./src/live.css",
