@@ -1,11 +1,13 @@
 import {
   acceptGig,
+  createTalentAvailability,
   declineGig,
   getAuthState,
   getTalentDashboard,
   interestedGig,
   signInWithPassword,
-  signOut
+  signOut,
+  updateTalentProfile
 } from "./lib/hubApi.js";
 
 const root = document.querySelector("#root");
@@ -256,11 +258,7 @@ function homeView({ profile, openGigs, assignments }) {
           </div>
           <span class="count-pill">${openGigs.length} live</span>
         </div>
-        ${
-          openGigs[0]
-            ? gigCard(openGigs[0], true)
-            : emptyState("No open gigs yet", "New invitations from Black Label Hub will appear here as soon as they are sent.")
-        }
+        ${openGigs[0] ? gigCard(openGigs[0], true) : emptyState("No open gigs yet", "New invitations from Black Label Hub will appear here as soon as they are sent.")}
       </section>
       <section class="panel next-panel">
         <div class="section-head">
@@ -270,11 +268,7 @@ function homeView({ profile, openGigs, assignments }) {
           </div>
           <span class="pill attention">${escapeHtml(nextGig?.contractStatus || "No active booking")}</span>
         </div>
-        ${
-          nextGig
-            ? `<h3>${escapeHtml(nextGig.title)}</h3><p>${escapeHtml(nextGig.role)} in ${escapeHtml(nextGig.location)}. Pay is ${escapeHtml(nextGig.pay)}.</p>`
-            : `<p>You do not have a confirmed gig yet. Accepted opportunities move here after admin confirmation.</p>`
-        }
+        ${nextGig ? `<h3>${escapeHtml(nextGig.title)}</h3><p>${escapeHtml(nextGig.role)} in ${escapeHtml(nextGig.location)}. Pay is ${escapeHtml(nextGig.pay)}.</p>` : `<p>You do not have a confirmed gig yet. Accepted opportunities move here after admin confirmation.</p>`}
         <a class="button button-secondary full-width" href="#assignments">View my gigs</a>
       </section>
     </div>
@@ -357,7 +351,7 @@ function calendarView({ calendarDays }) {
     <section class="page-head">
       <p class="mini-label">Calendar</p>
       <h1>Dates, holds, and bookings</h1>
-      <p>This is the talent-facing version of the master event calendar. Black Label Hub controls the source data.</p>
+      <p>This is the talent-facing version of the master event calendar. Black Label Hub controls bookings; you control your availability windows.</p>
     </section>
     ${talentCalendar(calendarDays)}
   `;
@@ -383,42 +377,48 @@ function profileView({ profile, user, teamMember }) {
     <section class="page-head">
       <p class="mini-label">Profile</p>
       <h1>${escapeHtml(profile.name)}</h1>
-      <p>Live profile data comes from team_members and roster_profiles in Black Label Hub.</p>
+      <p>Update your talent profile and availability. Changes write back to the same Hub tables.</p>
     </section>
     ${teamMember ? "" : emptyState("No linked team member", "This login is valid, but it is not linked to a team_members row yet. Add this user's auth id or email in Hub to activate the portal.")}
-    <section class="profile-grid">
-      <article class="panel profile-panel">
-        <p class="mini-label">Talent profile</p>
-        <h2>${escapeHtml(profile.role)}</h2>
-        <p>${escapeHtml(profile.bio)}</p>
-        <div class="detail-list compact">
-          ${detailRow("Home base", profile.city)}
-          ${detailRow("Phone", profile.phone)}
-          ${detailRow("Email", profile.email || user?.email || "")}
-          ${detailRow("Talent tier", profile.rating)}
-        </div>
+    <section class="profile-grid editable-profile-grid">
+      <article class="panel profile-panel wide-panel">
+        <p class="mini-label">Edit profile</p>
+        <h2>Your booking profile</h2>
+        <form class="talent-form" data-profile-form>
+          <label>Name<input name="name" value="${escapeHtml(profile.name)}" /></label>
+          <label>Phone<input name="phone" value="${escapeHtml(profile.phone === "Not set" ? "" : profile.phone)}" /></label>
+          <label>Primary role<input name="role" value="${escapeHtml(profile.role)}" /></label>
+          <label>Home base<input name="home_base" value="${escapeHtml(profile.city === "Not set" ? "" : profile.city)}" /></label>
+          <label>Talent tier<input name="profile_tier" value="${escapeHtml(profile.rating === "Roster" ? "" : profile.rating)}" /></label>
+          <label>Height<input name="height" value="${escapeHtml(profile.sizes.height === "Not set" ? "" : profile.sizes.height)}" /></label>
+          <label>Shirt<input name="shirt_size" value="${escapeHtml(profile.sizes.shirt === "Not set" ? "" : profile.sizes.shirt)}" /></label>
+          <label>Shoe<input name="shoe_size" value="${escapeHtml(profile.sizes.shoe === "Not set" ? "" : profile.sizes.shoe)}" /></label>
+          <label>Instagram<input name="instagram" value="${escapeHtml(profile.socials.instagram === "Not set" ? "" : profile.socials.instagram)}" /></label>
+          <label>TikTok<input name="tiktok" value="${escapeHtml(profile.socials.tiktok === "Not set" ? "" : profile.socials.tiktok)}" /></label>
+          <label class="full-field">Roles accepted<input name="roles_accepted" value="${escapeHtml(profile.roles.join(", "))}" placeholder="Model, Brand Ambassador, Influencer" /></label>
+          <label class="full-field">Not available for<input name="not_available_for" value="${escapeHtml(profile.notAvailableFor.join(", "))}" placeholder="Heavy setup, late nights, travel" /></label>
+          <label class="full-field">Bio<textarea name="bio">${escapeHtml(profile.bio)}</textarea></label>
+          <button class="button button-primary" type="submit">Save profile</button>
+        </form>
       </article>
       <article class="panel profile-panel">
         <p class="mini-label">Availability</p>
-        <h2>Control your dates</h2>
-        <p>Availability shown in the calendar comes from talent_availability records in Hub.</p>
+        <h2>Block or open dates</h2>
+        <form class="talent-form compact-form" data-availability-form>
+          <label>Start<input name="starts_at" type="datetime-local" required /></label>
+          <label>End<input name="ends_at" type="datetime-local" required /></label>
+          <label>Status<select name="status"><option value="available">Available</option><option value="preferred">Preferred</option><option value="tentative">Tentative</option><option value="unavailable">Unavailable</option><option value="vacation">Vacation</option></select></label>
+          <label class="full-field">Notes<textarea name="notes" placeholder="Vacation, unavailable after 5 PM, preferred window, etc."></textarea></label>
+          <button class="button button-secondary full-width" type="submit">Save availability</button>
+        </form>
       </article>
       <article class="panel profile-panel">
-        <p class="mini-label">Roles</p>
-        <h2>What you accept</h2>
-        <div class="chip-list">${profile.roles.map((role) => `<span>${escapeHtml(role)}</span>`).join("")}</div>
-        <p class="mini-label profile-subhead">Not available for</p>
-        <div class="chip-list muted">${profile.notAvailableFor.map((role) => `<span>${escapeHtml(role)}</span>`).join("") || "<span>Not set</span>"}</div>
-      </article>
-      <article class="panel profile-panel">
-        <p class="mini-label">Sizing and socials</p>
-        <h2>Booking info</h2>
+        <p class="mini-label">Contact</p>
+        <h2>${escapeHtml(profile.role)}</h2>
         <div class="detail-list compact">
-          ${detailRow("Height", profile.sizes.height)}
-          ${detailRow("Shirt", profile.sizes.shirt)}
-          ${detailRow("Shoe", profile.sizes.shoe)}
-          ${detailRow("Instagram", profile.socials.instagram)}
-          ${detailRow("TikTok", profile.socials.tiktok)}
+          ${detailRow("Email", profile.email || user?.email || "")}
+          ${detailRow("Phone", profile.phone)}
+          ${detailRow("Talent tier", profile.rating)}
         </div>
       </article>
     </section>
@@ -488,15 +488,42 @@ async function refreshDashboard(message) {
 }
 
 root.addEventListener("submit", async (event) => {
-  const form = event.target.closest("[data-login-form]");
-  if (!form) return;
-  event.preventDefault();
-  const formData = new FormData(form);
-  try {
-    await signInWithPassword(formData.get("email"), formData.get("password"));
-    await refreshDashboard();
-  } catch (error) {
-    renderLogin(error.message);
+  const loginForm = event.target.closest("[data-login-form]");
+  if (loginForm) {
+    event.preventDefault();
+    const formData = new FormData(loginForm);
+    try {
+      await signInWithPassword(formData.get("email"), formData.get("password"));
+      await refreshDashboard();
+    } catch (error) {
+      renderLogin(error.message);
+    }
+    return;
+  }
+
+  const profileForm = event.target.closest("[data-profile-form]");
+  if (profileForm) {
+    event.preventDefault();
+    const formData = new FormData(profileForm);
+    try {
+      await updateTalentProfile(Object.fromEntries(formData.entries()));
+      await refreshDashboard("Profile saved to Black Label Hub.");
+    } catch (error) {
+      renderToast(error.message || "Profile update failed.", "error");
+    }
+    return;
+  }
+
+  const availabilityForm = event.target.closest("[data-availability-form]");
+  if (availabilityForm) {
+    event.preventDefault();
+    const formData = new FormData(availabilityForm);
+    try {
+      await createTalentAvailability(Object.fromEntries(formData.entries()));
+      await refreshDashboard("Availability saved to your calendar.");
+    } catch (error) {
+      renderToast(error.message || "Availability update failed.", "error");
+    }
   }
 });
 
