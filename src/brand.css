@@ -1,13 +1,51 @@
+.brand {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .brand-mark {
-  width: 48px;
-  height: 48px;
+  width: min(210px, 100%);
+  height: 92px;
   display: block;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 8px;
-  background: #050207 url("../icons/icon-192.png") center / contain no-repeat;
+  border: 0;
+  border-radius: 0;
+  background: transparent url("../icons/brand-logo.png") left center / contain no-repeat;
   color: transparent;
   font-size: 0;
   line-height: 0;
-  box-shadow: var(--glow);
+  box-shadow: none;
+}
+
+.brand > div:not(.brand-mark) {
+  display: none;
+}
+
+.login-panel .brand {
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.login-panel .brand-mark {
+  width: min(260px, 100%);
+  height: 136px;
+  background-position: center;
+}
+
+@media (max-width: 1180px) {
+  .sidebar .brand {
+    margin-bottom: 0;
+  }
+
+  .sidebar .brand-mark {
+    width: 180px;
+    height: 72px;
+  }
+}
+
+@media (max-width: 760px) {
+  .brand {
+    display: none;
+  }
 }
