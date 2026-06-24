@@ -377,6 +377,37 @@ body::before {
   margin: 0;
 }
 
+.profile-panel .compact-form {
+  grid-template-columns: 1fr;
+}
+
+.profile-panel .compact-form input[type="datetime-local"] {
+  min-width: 0;
+  width: 100%;
+  padding-right: 44px;
+  color-scheme: dark;
+  line-height: 1.2;
+}
+
+.profile-panel .compact-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  opacity: 0.92;
+  filter: invert(1);
+}
+
+@media (min-width: 1500px) {
+  .profile-grid.editable-profile-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(430px, 0.55fr);
+  }
+
+  .profile-panel .compact-form {
+    grid-template-columns: repeat(2, minmax(190px, 1fr));
+  }
+}
+
 @media (max-width: 1180px) {
   .content {
     width: 100%;
