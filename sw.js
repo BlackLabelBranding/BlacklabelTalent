@@ -9,15 +9,9 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
-      .then(() => self.registration.unregister())
-      .then(() =>
-        self.clients.matchAll({ type: "window" }).then((clients) => {
-          clients.forEach((client) => client.navigate(client.url));
-        })
-      )
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(fetch(event.request));
+self.addEventListener("fetch", () => {
+  return;
 });
