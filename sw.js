@@ -1,4 +1,4 @@
-const CACHE_NAME = "blacklabel-talent-v4";
+const CACHE_NAME = "blacklabel-talent-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,11 +7,11 @@ const APP_SHELL = [
   "./icons/favicon-16.png",
   "./icons/favicon-32.png",
   "./icons/icon-192.png",
-  "./src/app.js",
-  "./src/styles.css",
-  "./src/brand.css",
-  "./src/live.css",
-  "./src/app-polish.css",
+  "./src/app.js?v=20260624a",
+  "./src/styles.css?v=20260624a",
+  "./src/brand.css?v=20260624a",
+  "./src/live.css?v=20260624a",
+  "./src/app-polish.css?v=20260624a",
   "./src/data/mockData.js",
   "./src/lib/hubApi.js"
 ];
