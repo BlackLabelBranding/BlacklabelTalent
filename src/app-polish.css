@@ -141,6 +141,77 @@ body::before {
   line-height: 1.15;
 }
 
+.gig-card {
+  border-color: rgba(255, 53, 200, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 53, 200, 0.055), transparent 42%),
+    rgba(12, 7, 17, 0.9);
+}
+
+.gig-card__top {
+  position: relative;
+  margin: -5px -5px 16px;
+  padding: 15px 15px 15px 18px;
+  border: 1px solid rgba(255, 53, 200, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 53, 200, 0.2), rgba(143, 92, 255, 0.12) 58%, rgba(24, 243, 255, 0.055)),
+    rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 36px rgba(255, 53, 200, 0.08);
+}
+
+.gig-card__top::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 18px rgba(255, 53, 200, 0.72);
+}
+
+.gig-card__top .mini-label {
+  margin-bottom: 8px;
+  color: #ff62dc;
+  text-shadow: 0 0 12px rgba(255, 53, 200, 0.45);
+}
+
+.gig-card h3 {
+  max-width: 100%;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1.02;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 18px rgba(255, 53, 200, 0.46), 0 2px 0 rgba(0, 0, 0, 0.28);
+}
+
+.gig-card .pill {
+  margin-top: 3px;
+  border-color: rgba(67, 255, 155, 0.42);
+  background: rgba(67, 255, 155, 0.14);
+  box-shadow: 0 0 18px rgba(67, 255, 155, 0.12);
+}
+
+.gig-meta {
+  padding: 10px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.gig-meta span {
+  color: rgba(220, 199, 223, 0.78);
+}
+
+.featured-gig .gig-card__top {
+  border-color: rgba(255, 53, 200, 0.34);
+  background:
+    linear-gradient(90deg, rgba(255, 53, 200, 0.26), rgba(143, 92, 255, 0.16) 58%, rgba(24, 243, 255, 0.075)),
+    rgba(255, 255, 255, 0.045);
+}
+
 .profile-grid.editable-profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.38fr) minmax(360px, 0.62fr);
@@ -446,6 +517,15 @@ body::before {
 
   .panel {
     padding: 18px;
+  }
+
+  .gig-card__top {
+    margin: -4px -4px 14px;
+    padding: 14px;
+  }
+
+  .gig-card h3 {
+    font-size: clamp(25px, 8vw, 34px);
   }
 
   .talent-form,
