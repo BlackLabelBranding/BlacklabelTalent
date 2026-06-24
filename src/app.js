@@ -1,6 +1,7 @@
 import {
   acceptGig,
   createTalentAvailability,
+  createTalentAvailabilityRule,
   declineGig,
   getAuthState,
   getTalentDashboard,
@@ -8,7 +9,7 @@ import {
   signInWithPassword,
   signOut,
   updateTalentProfile
-} from "./lib/hubApi.js";
+} from "./lib/hubApi.js?v=20260624b";
 
 const root = document.querySelector("#root");
 
@@ -38,10 +39,19 @@ const statusTone = {
   Assigned: "confirmed",
   Confirmed: "confirmed",
   Signed: "confirmed",
+  Paid: "confirmed",
+  Active: "confirmed",
   "Needs signature": "attention",
   "Pending completion": "attention",
-  Pending: "attention"
+  Pending: "attention",
+  Draft: "attention",
+  Declined: "neutral",
+  Canceled: "neutral",
+  Cancelled: "neutral",
+  Unpaid: "attention"
 };
+
+const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 let dashboardState = null;
 let activeCalendarMonth = monthKeyFromDate(new Date());
@@ -59,6 +69,21 @@ function currentRoute() {
   const hash = globalThis.location.hash.replace("#", "");
   if (hash.startsWith("gig/")) return hash;
   return routes[hash] ? hash : "home";
+}
+
+function displayValue(value, fallback = "Not set") {
+  if (value === 0) return "0";
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function formValue(value) {
+  const text = displayValue(value, "");
+  return text === "Not set" ? "" : text;
+}
+
+function option(value, label, selectedValue) {
+  return `<option value="${escapeHtml(value)}" ${String(value) === String(selectedValue) ? "selected" : ""}>${escapeHtml(label)}</option>`;
 }
 
 function navMarkup(activeRoute) {
@@ -119,19 +144,63 @@ function gigCard(gig, featured = false) {
   `;
 }
 
+function detailRow(label, value) {
+  return `
+    <div class="detail-row">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(displayValue(value))}</strong>
+    </div>
+  `;
+}
+
+function detailLink(label, url) {
+  if (!url) return detailRow(label, "Not set");
+  return `
+    <div class="detail-row">
+      <span>${escapeHtml(label)}</span>
+      <strong><a class="detail-link" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">Open file</a></strong>
+    </div>
+  `;
+}
+
 function assignmentRow(assignment) {
   const contractTone = statusTone[assignment.contractStatus] || "neutral";
   const paymentTone = statusTone[assignment.paymentStatus] || "neutral";
   return `
-    <article class="assignment-row">
-      <div>
-        <p class="mini-label">${escapeHtml(assignment.date)}</p>
-        <h3>${escapeHtml(assignment.title)}</h3>
-        <span>${escapeHtml(assignment.role)} &middot; ${escapeHtml(assignment.location)} &middot; ${escapeHtml(assignment.pay)}</span>
+    <article class="assignment-row expanded-assignment">
+      <div class="assignment-summary">
+        <div>
+          <p class="mini-label">${escapeHtml(assignment.date)}</p>
+          <h3>${escapeHtml(assignment.title)}</h3>
+          <span>${escapeHtml(assignment.role)} &middot; ${escapeHtml(assignment.location)} &middot; ${escapeHtml(assignment.pay)}</span>
+        </div>
+        <div class="assignment-status">
+          <span class="pill ${contractTone}">${escapeHtml(assignment.contractStatus)}</span>
+          <span class="pill ${paymentTone}">${escapeHtml(assignment.paymentStatus)}</span>
+        </div>
       </div>
-      <div class="assignment-status">
-        <span class="pill ${contractTone}">${escapeHtml(assignment.contractStatus)}</span>
-        <span class="pill ${paymentTone}">${escapeHtml(assignment.paymentStatus)}</span>
+      <div class="assignment-detail-list">
+        ${detailRow("Client", assignment.clientName)}
+        ${detailRow("Division", assignment.division)}
+        ${detailRow("Full address", assignment.fullAddress)}
+        ${detailRow("Timezone", assignment.timezone)}
+        ${detailRow("Assignment status", assignment.status)}
+        ${detailRow("Offer status", assignment.offerStatus)}
+        ${detailRow("Call time", assignment.callTime)}
+        ${detailRow("Arrival", assignment.arrivalTime)}
+        ${detailRow("Departure", assignment.departureTime)}
+        ${detailRow("Offered", assignment.offeredAt)}
+        ${detailRow("Accepted", assignment.acceptedAt)}
+        ${detailRow("Confirmed", assignment.confirmedAt)}
+        ${detailRow("Completed", assignment.completedAt)}
+        ${detailRow("Paid", assignment.paidAt)}
+        ${detailRow("Public notes", assignment.publicNotes)}
+        ${detailRow("Contract title", assignment.contractTitle)}
+        ${detailRow("Contract sent", assignment.contractSentAt)}
+        ${detailRow("Contract viewed", assignment.contractViewedAt)}
+        ${detailRow("Contract signed", assignment.contractSignedAt)}
+        ${detailRow("Signed name", assignment.signedName)}
+        ${detailLink("Contract PDF", assignment.pdfUrl)}
       </div>
     </article>
   `;
@@ -215,15 +284,6 @@ function renderToast(message, tone = "success") {
   toast.setAttribute("role", "status");
   toast.innerHTML = `<span aria-hidden="true">${icons.check}</span>${escapeHtml(message)}`;
   document.querySelector(".content")?.prepend(toast);
-}
-
-function detailRow(label, value) {
-  return `
-    <div class="detail-row">
-      <span>${escapeHtml(label)}</span>
-      <strong>${escapeHtml(value)}</strong>
-    </div>
-  `;
 }
 
 function homeView({ profile, openGigs, assignments }) {
@@ -317,15 +377,35 @@ function gigDetailView(dashboard, gigId) {
           </div>
           <span class="pill ${statusTone[gig.status] || "open"}">${escapeHtml(gig.status)}</span>
         </div>
-        <div class="detail-list">
+        <div class="detail-list two-column-details">
+          ${detailRow("Client", gig.clientName)}
+          ${detailRow("Division", gig.division)}
+          ${detailRow("Work type", gig.workType)}
+          ${detailRow("Opportunity status", gig.opportunityStatus)}
+          ${detailRow("Role status", gig.roleStatus)}
+          ${detailRow("Visibility", gig.visibility)}
           ${detailRow("Time", gig.time)}
+          ${detailRow("Timezone", gig.timezone)}
+          ${detailRow("Call time", gig.callTime)}
+          ${detailRow("Arrival", gig.arrivalTime)}
+          ${detailRow("Departure", gig.departureTime)}
           ${detailRow("Location", gig.location)}
+          ${detailRow("Full address", gig.fullAddress)}
           ${detailRow("Pay", gig.pay)}
+          ${detailRow("Slots needed", gig.slotsNeeded)}
+          ${detailRow("Min slots", gig.minSlots)}
+          ${detailRow("Max slots", gig.maxSlots)}
           ${detailRow("Dress code", gig.dressCode)}
           ${detailRow("Manual labor required", gig.manualLabor)}
           ${detailRow("Content required", gig.contentRequired)}
           ${detailRow("Appearance required", gig.appearanceRequired)}
           ${detailRow("Contract", gig.contractStatus)}
+          ${detailRow("Invite channel", gig.channel)}
+          ${detailRow("Sent", gig.offerSentAt)}
+          ${detailRow("Viewed", gig.viewedAt)}
+          ${detailRow("Responded", gig.respondedAt)}
+          ${detailRow("Expires", gig.expiresAt)}
+          ${detailRow("Response notes", gig.responseNotes)}
         </div>
         <div class="deliverables detail-deliverables">
           <span>Deliverables</span>
@@ -362,17 +442,38 @@ function assignmentsView({ assignments }) {
     <section class="page-head">
       <p class="mini-label">Booked work</p>
       <h1>My Gigs</h1>
-      <p>Track confirmed work, contracts, and payment status.</p>
+      <p>Track confirmed work, contracts, timing, notes, and payment status.</p>
     </section>
     <section class="panel">
-      <div class="assignment-list">
+      <div class="assignment-list expanded-list">
         ${assignments.length ? assignments.map(assignmentRow).join("") : emptyState("No confirmed gigs", "Accepted opportunities will move here once Black Label admin confirms an assignment.")}
       </div>
     </section>
   `;
 }
 
-function profileView({ profile, user, teamMember }) {
+function availabilityRulesMarkup(rules = []) {
+  if (!rules.length) {
+    return `<div class="rule-list-empty">No recurring availability rules yet.</div>`;
+  }
+
+  return `
+    <div class="rule-list">
+      ${rules.map((rule) => `
+        <article class="rule-row ${rule.isActive ? "" : "inactive"}">
+          <div>
+            <strong>${escapeHtml(rule.ruleName)}</strong>
+            <span>${escapeHtml(rule.weekdayLabel)} &middot; ${escapeHtml(rule.startTime || "Any time")} - ${escapeHtml(rule.endTime || "Any time")}</span>
+          </div>
+          <span class="pill ${statusTone[rule.statusLabel] || (rule.status === "unavailable" ? "neutral" : "open")}">${escapeHtml(rule.statusLabel)}${rule.isActive ? "" : " off"}</span>
+          ${rule.notes ? `<p>${escapeHtml(rule.notes)}</p>` : ""}
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function profileView({ profile, user, teamMember, availabilityRules }) {
   return `
     <section class="page-head">
       <p class="mini-label">Profile</p>
@@ -385,19 +486,29 @@ function profileView({ profile, user, teamMember }) {
         <p class="mini-label">Edit profile</p>
         <h2>Your booking profile</h2>
         <form class="talent-form" data-profile-form>
-          <label>Name<input name="name" value="${escapeHtml(profile.name)}" /></label>
-          <label>Phone<input name="phone" value="${escapeHtml(profile.phone === "Not set" ? "" : profile.phone)}" /></label>
-          <label>Primary role<input name="role" value="${escapeHtml(profile.role)}" /></label>
-          <label>Home base<input name="home_base" value="${escapeHtml(profile.city === "Not set" ? "" : profile.city)}" /></label>
-          <label>Talent tier<input name="profile_tier" value="${escapeHtml(profile.rating === "Roster" ? "" : profile.rating)}" /></label>
-          <label>Height<input name="height" value="${escapeHtml(profile.sizes.height === "Not set" ? "" : profile.sizes.height)}" /></label>
-          <label>Shirt<input name="shirt_size" value="${escapeHtml(profile.sizes.shirt === "Not set" ? "" : profile.sizes.shirt)}" /></label>
-          <label>Shoe<input name="shoe_size" value="${escapeHtml(profile.sizes.shoe === "Not set" ? "" : profile.sizes.shoe)}" /></label>
-          <label>Instagram<input name="instagram" value="${escapeHtml(profile.socials.instagram === "Not set" ? "" : profile.socials.instagram)}" /></label>
-          <label>TikTok<input name="tiktok" value="${escapeHtml(profile.socials.tiktok === "Not set" ? "" : profile.socials.tiktok)}" /></label>
+          <label>Name<input name="name" value="${escapeHtml(formValue(profile.name))}" /></label>
+          <label>Phone<input name="phone" value="${escapeHtml(formValue(profile.phone))}" /></label>
+          <label>Primary role<input name="role" value="${escapeHtml(formValue(profile.roleLabel || profile.role))}" /></label>
+          <label>Profile type<input name="profile_type" value="${escapeHtml(formValue(profile.role))}" /></label>
+          <label>Home base<input name="home_base" value="${escapeHtml(formValue(profile.city))}" /></label>
+          <label>Talent tier<input name="profile_tier" value="${escapeHtml(formValue(profile.rating === "Roster" ? "" : profile.rating))}" /></label>
+          <label>Avatar URL<input name="avatar_url" value="${escapeHtml(formValue(profile.avatarUrl))}" /></label>
+          <label>Avatar initials<input name="avatar_initials" value="${escapeHtml(formValue(profile.avatarInitials))}" /></label>
+          <label>Height<input name="height" value="${escapeHtml(formValue(profile.sizes.height))}" /></label>
+          <label>Weight<input name="weight" value="${escapeHtml(formValue(profile.sizes.weight))}" /></label>
+          <label>Hair color<input name="hair_color" value="${escapeHtml(formValue(profile.sizes.hairColor))}" /></label>
+          <label>Eye color<input name="eye_color" value="${escapeHtml(formValue(profile.sizes.eyeColor))}" /></label>
+          <label>Shirt<input name="shirt_size" value="${escapeHtml(formValue(profile.sizes.shirt))}" /></label>
+          <label>Dress<input name="dress_size" value="${escapeHtml(formValue(profile.sizes.dress))}" /></label>
+          <label>Shoe<input name="shoe_size" value="${escapeHtml(formValue(profile.sizes.shoe))}" /></label>
+          <label>Instagram<input name="instagram" value="${escapeHtml(formValue(profile.socials.instagram))}" /></label>
+          <label>TikTok<input name="tiktok" value="${escapeHtml(formValue(profile.socials.tiktok))}" /></label>
+          <label>Facebook<input name="facebook" value="${escapeHtml(formValue(profile.socials.facebook))}" /></label>
+          <label>Website<input name="website" value="${escapeHtml(formValue(profile.socials.website))}" /></label>
           <label class="full-field">Roles accepted<input name="roles_accepted" value="${escapeHtml(profile.roles.join(", "))}" placeholder="Model, Brand Ambassador, Influencer" /></label>
           <label class="full-field">Not available for<input name="not_available_for" value="${escapeHtml(profile.notAvailableFor.join(", "))}" placeholder="Heavy setup, late nights, travel" /></label>
-          <label class="full-field">Bio<textarea name="bio">${escapeHtml(profile.bio)}</textarea></label>
+          <label class="full-field">Booking notes<textarea name="booking_notes" placeholder="Public booking preferences talent can share with Hub.">${escapeHtml(formValue(profile.bookingNotes))}</textarea></label>
+          <label class="full-field">Bio<textarea name="bio">${escapeHtml(formValue(profile.bio))}</textarea></label>
           <button class="button button-primary" type="submit">Save profile</button>
         </form>
       </article>
@@ -408,17 +519,40 @@ function profileView({ profile, user, teamMember }) {
           <label>Start<input name="starts_at" type="datetime-local" required /></label>
           <label>End<input name="ends_at" type="datetime-local" required /></label>
           <label>Status<select name="status"><option value="available">Available</option><option value="preferred">Preferred</option><option value="tentative">Tentative</option><option value="unavailable">Unavailable</option><option value="vacation">Vacation</option></select></label>
+          <label>Timezone<input name="timezone" value="America/Chicago" /></label>
           <label class="full-field">Notes<textarea name="notes" placeholder="Vacation, unavailable after 5 PM, preferred window, etc."></textarea></label>
           <button class="button button-secondary full-width" type="submit">Save availability</button>
         </form>
       </article>
       <article class="panel profile-panel">
-        <p class="mini-label">Contact</p>
+        <p class="mini-label">Recurring rules</p>
+        <h2>Weekly availability</h2>
+        <form class="talent-form compact-form" data-availability-rule-form>
+          <label>Rule name<input name="rule_name" placeholder="Friday nights" /></label>
+          <label>Weekday<select name="weekday">${weekdays.map((day, index) => option(index, day, 5)).join("")}</select></label>
+          <label>Start time<input name="start_time" type="time" /></label>
+          <label>End time<input name="end_time" type="time" /></label>
+          <label>Status<select name="status"><option value="available">Available</option><option value="preferred">Preferred</option><option value="tentative">Tentative</option><option value="unavailable">Unavailable</option></select></label>
+          <label>Active<select name="is_active"><option value="true">Active</option><option value="false">Paused</option></select></label>
+          <label class="full-field">Notes<textarea name="notes" placeholder="Every Friday after 6 PM, school schedule, etc."></textarea></label>
+          <button class="button button-secondary full-width" type="submit">Save rule</button>
+        </form>
+        ${availabilityRulesMarkup(availabilityRules)}
+      </article>
+      <article class="panel profile-panel">
+        <p class="mini-label">Hub record</p>
         <h2>${escapeHtml(profile.role)}</h2>
         <div class="detail-list compact">
           ${detailRow("Email", profile.email || user?.email || "")}
           ${detailRow("Phone", profile.phone)}
+          ${detailRow("Team status", profile.teamStatus)}
+          ${detailRow("Profile status", profile.status)}
           ${detailRow("Talent tier", profile.rating)}
+          ${detailRow("Role key", profile.roleKey)}
+          ${detailRow("Role level", profile.roleLevel)}
+          ${detailRow("Manager id", profile.managerId)}
+          ${detailRow("Avatar initials", profile.avatarInitials)}
+          ${detailLink("Avatar URL", profile.avatarUrl)}
         </div>
       </article>
     </section>
@@ -523,6 +657,19 @@ root.addEventListener("submit", async (event) => {
       await refreshDashboard("Availability saved to your calendar.");
     } catch (error) {
       renderToast(error.message || "Availability update failed.", "error");
+    }
+    return;
+  }
+
+  const availabilityRuleForm = event.target.closest("[data-availability-rule-form]");
+  if (availabilityRuleForm) {
+    event.preventDefault();
+    const formData = new FormData(availabilityRuleForm);
+    try {
+      await createTalentAvailabilityRule(Object.fromEntries(formData.entries()));
+      await refreshDashboard("Recurring availability rule saved.");
+    } catch (error) {
+      renderToast(error.message || "Recurring availability update failed.", "error");
     }
   }
 });
