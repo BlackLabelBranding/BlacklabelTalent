@@ -8,6 +8,7 @@ export const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InhvcGN0dGtybWp2d2RkZGF3ZGFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNTQzNjgsImV4cCI6MjA3MTczMDM2OH0.5s1HHvDsDIgWw6TVR3YfhzJC9uEjcVfunRyMa6B7xYY".replace("eyJpc3MiOiJIUzI1Ni", "eyJpc3MiOiJzdXBhYmFzZSI");
 
 const SESSION_KEY = "blacklabel.talent.session";
+const AVATAR_BUCKET = "team-members";
 const EMPTY_DASHBOARD = {
   profile: talentProfile,
   openGigs: gigOpportunities,
@@ -33,11 +34,11 @@ function clearStoredSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
-function authHeaders(session = readSession()) {
+function authHeaders(session = readSession(), contentType = "application/json") {
   return {
     apikey: SUPABASE_ANON_KEY,
     Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
-    "Content-Type": "application/json"
+    ...(contentType ? { "Content-Type": contentType } : {})
   };
 }
 
@@ -138,6 +139,15 @@ function ids(records, key) {
 
 function inFilter(values) {
   return values.length ? `in.(${values.map(encodeURIComponent).join(",")})` : "in.()";
+}
+
+function storagePath(path) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+function safeFileName(name = "avatar") {
+  const cleaned = String(name).toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
+  return cleaned || "avatar";
 }
 
 async function fetchByIds(table, values) {
@@ -396,11 +406,31 @@ async function loadTalentContext(user) {
   };
 }
 
+export function consumePasswordRecoveryFromUrl() {
+  const params = new URLSearchParams(globalThis.location.hash.replace(/^#/, ""));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  const type = params.get("type");
+
+  if (type !== "recovery" || !accessToken || !refreshToken) return false;
+
+  const expiresIn = Number(params.get("expires_in") || 3600);
+  writeSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    token_type: params.get("token_type") || "bearer",
+    expires_in: expiresIn,
+    expires_at: Math.floor(Date.now() / 1000) + expiresIn
+  });
+  globalThis.history.replaceState(null, "", `${globalThis.location.pathname}#reset-password`);
+  return true;
+}
+
 export async function signInWithPassword(email, password) {
   const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: authHeaders(null),
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email: cleanValue(email)?.toLowerCase(), password })
   });
 
   if (!response.ok) {
@@ -410,6 +440,43 @@ export async function signInWithPassword(email, password) {
   const session = await response.json();
   writeSession(session);
   return session;
+}
+
+export async function requestPasswordReset(email) {
+  const cleanEmail = cleanValue(email)?.toLowerCase();
+  if (!cleanEmail) throw new Error("Enter the email for your talent account.");
+
+  const redirectTo = `${globalThis.location.origin}${globalThis.location.pathname}#reset-password`;
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+    method: "POST",
+    headers: authHeaders(null),
+    body: JSON.stringify({ email: cleanEmail, redirect_to: redirectTo })
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to send reset email. Confirm the email and try again.");
+  }
+
+  return true;
+}
+
+export async function updatePassword(password) {
+  const session = readSession();
+  if (!session?.access_token) throw new Error("Open the reset link again before setting a new password.");
+  if (!password || String(password).length < 8) throw new Error("Use at least 8 characters for the new password.");
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: "PUT",
+    headers: authHeaders(session),
+    body: JSON.stringify({ password })
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to update password. The reset link may have expired.");
+  }
+
+  clearStoredSession();
+  return true;
 }
 
 export async function signOut() {
@@ -433,6 +500,39 @@ export async function getTalentDashboard() {
   const { user } = await getAuthState();
   if (!user) return { ...EMPTY_DASHBOARD, user: null, teamMember: null };
   return loadTalentContext(user);
+}
+
+export async function uploadTalentAvatar(file) {
+  const dashboard = await getTalentDashboard();
+  const session = readSession();
+  const teamMemberId = dashboard.teamMember?.id;
+  if (!teamMemberId) throw new Error("No linked team member profile was found.");
+  if (!file?.size) throw new Error("Choose an avatar image first.");
+  if (!file.type?.startsWith("image/")) throw new Error("Avatar must be an image file.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("Avatar image must be under 5 MB.");
+
+  const objectPath = `avatars/${teamMemberId}/${Date.now()}-${safeFileName(file.name)}`;
+  const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${AVATAR_BUCKET}/${storagePath(objectPath)}`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(session, file.type || "application/octet-stream"),
+      "x-upsert": "true"
+    },
+    body: file
+  });
+
+  if (!uploadResponse.ok) {
+    const message = await uploadResponse.text();
+    throw new Error(message || "Unable to upload avatar image.");
+  }
+
+  const avatarUrl = `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${storagePath(objectPath)}`;
+  await request(`/rest/v1/team_members?id=eq.${teamMemberId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ avatar_url: avatarUrl })
+  });
+
+  return avatarUrl;
 }
 
 export async function updateInvitationStatus(invitationId, status) {
