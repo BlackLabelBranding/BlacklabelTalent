@@ -182,7 +182,7 @@ p {
   border-radius: 10px;
   background:
     linear-gradient(90deg, rgba(5, 2, 7, 0.92), rgba(5, 2, 7, 0.48)),
-    url("https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1700&q=80");
+    url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/blacklabeltalentlogo.png");
   background-position: center;
   background-size: cover;
   box-shadow: var(--shadow);
