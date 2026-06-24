@@ -1,15 +1,19 @@
 import {
   acceptGig,
+  consumePasswordRecoveryFromUrl,
   createTalentAvailability,
   createTalentAvailabilityRule,
   declineGig,
   getAuthState,
   getTalentDashboard,
   interestedGig,
+  requestPasswordReset,
   signInWithPassword,
   signOut,
-  updateTalentProfile
-} from "./lib/hubApi.js?v=20260624b";
+  updatePassword,
+  updateTalentProfile,
+  uploadTalentAvatar
+} from "./lib/hubApi.js?v=20260624l";
 
 const root = document.querySelector("#root");
 
@@ -68,6 +72,7 @@ function escapeHtml(value = "") {
 function currentRoute() {
   const hash = globalThis.location.hash.replace("#", "");
   if (hash.startsWith("gig/")) return hash;
+  if (["forgot-password", "reset-password"].includes(hash)) return hash;
   return routes[hash] ? hash : "home";
 }
 
@@ -168,7 +173,7 @@ function assignmentRow(assignment) {
   const paymentTone = statusTone[assignment.paymentStatus] || "neutral";
   return `
     <article class="assignment-row expanded-assignment">
-      <div class="assignment-summary">
+      <div class="assignment-summary event-title-panel">
         <div>
           <p class="mini-label">${escapeHtml(assignment.date)}</p>
           <h3>${escapeHtml(assignment.title)}</h3>
@@ -473,6 +478,23 @@ function availabilityRulesMarkup(rules = []) {
   `;
 }
 
+function avatarMarkup(profile) {
+  const image = profile.avatarUrl
+    ? `<img src="${escapeHtml(profile.avatarUrl)}" alt="${escapeHtml(profile.name)} avatar" />`
+    : `<span>${escapeHtml((profile.avatarInitials || profile.name || "BL").slice(0, 2).toUpperCase())}</span>`;
+  return `
+    <form class="avatar-uploader" data-avatar-upload-form>
+      <div class="avatar-preview">${image}</div>
+      <div>
+        <p class="mini-label">Profile photo</p>
+        <h3>Avatar image</h3>
+        <label class="file-control">Choose image<input name="avatar_file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
+        <button class="button button-secondary" type="submit">Upload avatar</button>
+      </div>
+    </form>
+  `;
+}
+
 function profileView({ profile, user, teamMember, availabilityRules }) {
   return `
     <section class="page-head">
@@ -485,6 +507,7 @@ function profileView({ profile, user, teamMember, availabilityRules }) {
       <article class="panel profile-panel wide-panel">
         <p class="mini-label">Edit profile</p>
         <h2>Your booking profile</h2>
+        ${avatarMarkup(profile)}
         <form class="talent-form" data-profile-form>
           <label>Name<input name="name" value="${escapeHtml(formValue(profile.name))}" /></label>
           <label>Phone<input name="phone" value="${escapeHtml(formValue(profile.phone))}" /></label>
@@ -565,27 +588,56 @@ function routeView(route, dashboard) {
   return views[route](dashboard);
 }
 
-function renderLogin(error = "") {
-  root.innerHTML = `
-    <main class="login-shell">
-      <form class="login-panel" data-login-form>
-        <div class="brand">
-          <div class="brand-mark">BL</div>
-          <div>
-            <p>Black Label</p>
-            <strong>Talent</strong>
-          </div>
-        </div>
-        <p class="mini-label">Talent login</p>
-        <h1>Welcome back.</h1>
-        <p>Sign in with the Supabase-authenticated talent account connected in Black Label Hub.</p>
-        ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
-        <label>Email<input name="email" type="email" autocomplete="email" required /></label>
-        <label>Password<input name="password" type="password" autocomplete="current-password" required /></label>
-        <button class="button button-primary full-width" type="submit">Log in</button>
-      </form>
-    </main>
-  `;
+function authShell(inner) {
+  root.innerHTML = `<main class="login-shell"><section class="login-panel">${inner}</section></main>`;
+}
+
+function renderLogin(error = "", notice = "") {
+  authShell(`
+    <form data-login-form>
+      <div class="brand"><div class="brand-mark">BL</div><div><p>Black Label</p><strong>Talent</strong></div></div>
+      <p class="mini-label">Talent login</p>
+      <h1>Welcome back.</h1>
+      <p>Sign in with the Supabase-authenticated talent account connected in Black Label Hub.</p>
+      ${notice ? `<div class="form-notice">${escapeHtml(notice)}</div>` : ""}
+      ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
+      <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required /></label>
+      <button class="button button-primary full-width" type="submit">Log in</button>
+      <button class="auth-link" type="button" data-action="forgot-password">Forgot password?</button>
+    </form>
+  `);
+}
+
+function renderPasswordRequest(error = "", notice = "") {
+  authShell(`
+    <form data-reset-request-form>
+      <p class="mini-label">Password reset</p>
+      <h1>Reset access.</h1>
+      <p>Enter the email connected to your Black Label Talent account. Supabase will send a secure reset link.</p>
+      ${notice ? `<div class="form-notice">${escapeHtml(notice)}</div>` : ""}
+      ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
+      <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+      <button class="button button-primary full-width" type="submit">Send reset link</button>
+      <button class="auth-link" type="button" data-action="back-to-login">Back to login</button>
+    </form>
+  `);
+}
+
+function renderSetPassword(error = "", notice = "") {
+  authShell(`
+    <form data-reset-password-form>
+      <p class="mini-label">New password</p>
+      <h1>Set password.</h1>
+      <p>Use at least 8 characters. After saving, sign in again with the new password.</p>
+      ${notice ? `<div class="form-notice">${escapeHtml(notice)}</div>` : ""}
+      ${error ? `<div class="form-error">${escapeHtml(error)}</div>` : ""}
+      <label>New password<input name="password" type="password" autocomplete="new-password" minlength="8" required /></label>
+      <label>Confirm password<input name="confirm_password" type="password" autocomplete="new-password" minlength="8" required /></label>
+      <button class="button button-primary full-width" type="submit">Update password</button>
+      <button class="auth-link" type="button" data-action="back-to-login">Back to login</button>
+    </form>
+  `);
 }
 
 function render(dashboard) {
@@ -594,13 +646,7 @@ function render(dashboard) {
   root.innerHTML = `
     <div class="app">
       <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark">BL</div>
-          <div>
-            <p>Black Label</p>
-            <strong>Talent</strong>
-          </div>
-        </div>
+        <div class="brand"><div class="brand-mark">BL</div><div><p>Black Label</p><strong>Talent</strong></div></div>
         <nav class="nav" aria-label="Talent portal navigation">${navMarkup(activeRoute)}</nav>
         <button class="sign-out" type="button" data-action="sign-out">Sign out</button>
       </aside>
@@ -611,6 +657,18 @@ function render(dashboard) {
 
 async function refreshDashboard(message) {
   root.innerHTML = `<main class="loading">Loading Talent Portal...</main>`;
+  if (consumePasswordRecoveryFromUrl()) {
+    renderSetPassword("", "Reset link verified. Choose a new password.");
+    return;
+  }
+  if (currentRoute() === "forgot-password") {
+    renderPasswordRequest();
+    return;
+  }
+  if (currentRoute() === "reset-password") {
+    renderSetPassword("Open the password reset link from your email before setting a new password.");
+    return;
+  }
   const auth = await getAuthState();
   if (!auth.isAuthenticated) {
     renderLogin();
@@ -631,6 +689,51 @@ root.addEventListener("submit", async (event) => {
       await refreshDashboard();
     } catch (error) {
       renderLogin(error.message);
+    }
+    return;
+  }
+
+  const resetRequestForm = event.target.closest("[data-reset-request-form]");
+  if (resetRequestForm) {
+    event.preventDefault();
+    const formData = new FormData(resetRequestForm);
+    try {
+      await requestPasswordReset(formData.get("email"));
+      renderPasswordRequest("", "Reset email sent. Check your inbox and open the link.");
+    } catch (error) {
+      renderPasswordRequest(error.message);
+    }
+    return;
+  }
+
+  const resetPasswordForm = event.target.closest("[data-reset-password-form]");
+  if (resetPasswordForm) {
+    event.preventDefault();
+    const formData = new FormData(resetPasswordForm);
+    const password = formData.get("password");
+    if (password !== formData.get("confirm_password")) {
+      renderSetPassword("Passwords do not match.");
+      return;
+    }
+    try {
+      await updatePassword(password);
+      globalThis.history.replaceState(null, "", globalThis.location.pathname);
+      renderLogin("", "Password updated. Sign in with your new password.");
+    } catch (error) {
+      renderSetPassword(error.message);
+    }
+    return;
+  }
+
+  const avatarForm = event.target.closest("[data-avatar-upload-form]");
+  if (avatarForm) {
+    event.preventDefault();
+    const file = new FormData(avatarForm).get("avatar_file");
+    try {
+      await uploadTalentAvatar(file);
+      await refreshDashboard("Avatar uploaded to your profile.");
+    } catch (error) {
+      renderToast(error.message || "Avatar upload failed.", "error");
     }
     return;
   }
@@ -686,6 +789,16 @@ root.addEventListener("click", async (event) => {
   if (!button) return;
 
   try {
+    if (button.dataset.action === "forgot-password") {
+      globalThis.location.hash = "forgot-password";
+      renderPasswordRequest();
+      return;
+    }
+    if (button.dataset.action === "back-to-login") {
+      globalThis.history.replaceState(null, "", globalThis.location.pathname);
+      renderLogin();
+      return;
+    }
     if (button.dataset.action === "sign-out") {
       await signOut();
       renderLogin();
@@ -711,6 +824,10 @@ root.addEventListener("click", async (event) => {
 });
 
 globalThis.addEventListener("hashchange", () => {
+  if (["forgot-password", "reset-password"].includes(currentRoute())) {
+    refreshDashboard();
+    return;
+  }
   if (dashboardState) render(dashboardState);
 });
 
