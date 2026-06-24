@@ -1,3 +1,16 @@
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+#root {
+  isolation: isolate;
+}
+
 .gig-card h3,
 .event-title-panel h3,
 .next-panel h3,
@@ -17,6 +30,7 @@
 .hero h1 {
   font-size: 0;
   line-height: 1;
+  letter-spacing: 0;
 }
 
 .hero h1::before {
@@ -159,7 +173,63 @@
   font-weight: 750;
 }
 
+@media (display-mode: standalone) {
+  body {
+    background-attachment: fixed;
+  }
+}
+
 @media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    height: 100svh;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    touch-action: pan-y;
+  }
+
+  .app {
+    height: 100svh;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+
+  .content,
+  .login-shell,
+  .loading {
+    height: 100svh;
+    min-height: 100svh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .content {
+    padding-top: max(14px, env(safe-area-inset-top));
+  }
+
+  .sidebar,
+  .sign-out {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .hero h1::before {
+    font-size: clamp(40px, 11vw, 52px);
+    letter-spacing: 0;
+  }
+
+  .page-head h1 {
+    letter-spacing: 0;
+  }
+
   .event-title-panel,
   .avatar-uploader {
     grid-template-columns: 1fr;
