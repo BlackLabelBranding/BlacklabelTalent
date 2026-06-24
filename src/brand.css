@@ -1,0 +1,56 @@
+:root {
+  --brand-logo-url: url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/blacklabeltalentlogo.png");
+}
+
+.brand {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand-mark {
+  width: min(210px, 100%);
+  height: 92px;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent var(--brand-logo-url) left center / contain no-repeat;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  box-shadow: none;
+}
+
+.brand > div:not(.brand-mark) {
+  display: none;
+}
+
+.login-panel .brand {
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.login-panel .brand-mark {
+  width: min(260px, 100%);
+  height: 136px;
+  background-position: center;
+}
+
+@media (max-width: 1180px) {
+  .sidebar .brand {
+    margin-bottom: 0;
+  }
+
+  .sidebar .brand-mark {
+    width: 180px;
+    height: 72px;
+  }
+}
+
+@media (max-width: 760px) {
+  .brand {
+    display: none;
+  }
+}
