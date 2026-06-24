@@ -343,7 +343,7 @@ function homeView({ profile, openGigs, assignments }) {
     <section class="hero">
       <div>
         <p class="mini-label">Black Label Talent</p>
-        <h1>Book the gig. Own the night.</h1>
+        <h1>Black Label Talent.</h1>
         <p class="hero-copy">Your gigs, contracts, pay, and availability in one place.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#gigs">See open gigs</a>
