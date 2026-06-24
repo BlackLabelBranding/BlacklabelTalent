@@ -1,4 +1,6 @@
 :root {
+  --hero-desktop-image: var(--hero-desktop-image);
+  --hero-mobile-image: url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/recommended_talent_portal_hero_mobile_1080x1350.jpg");
   color-scheme: dark;
   --ink: #fff7ff;
   --muted: #c9a8cf;
@@ -182,8 +184,8 @@ p {
   border-radius: 10px;
   background:
     linear-gradient(90deg, rgba(5, 2, 7, 0.92), rgba(5, 2, 7, 0.48)),
-    url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/merchboothpops4.jpg");
-  background-position: center;
+    url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/recommended_talent_portal_hero_1920x1080.jpg");
+  background-position: center center;
   background-size: cover;
   box-shadow: var(--shadow);
 }
@@ -882,8 +884,13 @@ p {
   .hero {
     align-items: start;
     flex-direction: column;
-    min-height: 470px;
+    min-height: 520px;
     padding: 24px;
+    background:
+      linear-gradient(180deg, rgba(5, 2, 7, 0.72), rgba(5, 2, 7, 0.94)),
+      var(--hero-mobile-image);
+    background-position: center top;
+    background-size: cover;
   }
 
   .hero h1,
