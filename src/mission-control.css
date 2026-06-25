@@ -1,0 +1,172 @@
+/* Mission Control UI pass */
+.hero {
+  isolation: isolate;
+  min-height: 390px;
+  align-items: end;
+  background:
+    linear-gradient(90deg, rgba(5, 2, 7, 0.94), rgba(5, 2, 7, 0.54)),
+    radial-gradient(circle at 76% 30%, rgba(77, 232, 255, 0.16), transparent 34%),
+    url("https://xopcttkrmjvwdddawdaa.supabase.co/storage/v1/object/public/Black%20Label%20Talent/recommended_talent_portal_hero_1920x1080.jpg");
+  background-position: center center;
+  background-size: cover;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.hero .mini-label {
+  color: #4de8ff;
+}
+
+.hero h1 {
+  max-width: 720px;
+  letter-spacing: -0.06em;
+  text-shadow: 0 0 34px rgba(255, 53, 200, 0.34);
+}
+
+.hero-actions {
+  margin-top: 26px;
+}
+
+.hero .button {
+  min-height: 48px;
+  border-radius: 999px;
+  padding-inline: 20px;
+}
+
+.profile-chip {
+  transform: translateY(-4px);
+}
+
+.mission-dispatch-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(77, 232, 255, 0.18);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(77, 232, 255, 0.11), rgba(255, 53, 200, 0.08)),
+    rgba(255, 255, 255, 0.035);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.mission-dispatch-card::before {
+  content: "";
+  position: absolute;
+  inset: auto -20% -60% 20%;
+  height: 150px;
+  background: radial-gradient(circle, rgba(77, 232, 255, 0.3), transparent 68%);
+  pointer-events: none;
+}
+
+.mission-dispatch-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mission-dispatch-card .mission-kicker {
+  color: #4de8ff;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mission-dispatch-card h3 {
+  margin: 0;
+  font-size: clamp(26px, 5vw, 44px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+  background: linear-gradient(90deg, #4de8ff, #ff35c8 54%, #ffd166);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mission-dispatch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mission-dispatch-meta span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 248, 255, 0.84);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.stat,
+.gig-card,
+.assignment-row,
+.panel {
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.stat:hover,
+.gig-card:hover,
+.assignment-row:hover,
+.panel:hover {
+  border-color: rgba(77, 232, 255, 0.2);
+}
+
+.button:active,
+.nav a:active,
+.notification-item:active {
+  transform: scale(0.98);
+}
+
+.nav a[href="#communications"] {
+  font-size: 0;
+  justify-content: center;
+}
+
+.nav a[href="#communications"]::before {
+  content: "MSG";
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: 330px;
+    padding: 22px 18px;
+  }
+
+  .hero::before {
+    inset: 12px;
+    border-radius: 12px;
+  }
+
+  .hero-actions {
+    max-width: 220px;
+  }
+
+  .mission-dispatch-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .mission-dispatch-card h3 {
+    font-size: clamp(28px, 10vw, 42px);
+  }
+
+  .nav a[href="#communications"] {
+    display: none !important;
+  }
+}
