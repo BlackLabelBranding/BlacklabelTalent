@@ -398,6 +398,69 @@ body::before {
   filter: invert(1);
 }
 
+/* Restore premium gig title hierarchy */
+.gig-card__top,
+.assignment-summary {
+  position: relative;
+  overflow: hidden;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(77, 232, 255, 0.22);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(255, 53, 200, 0.22), rgba(77, 232, 255, 0.08) 52%, rgba(255, 209, 102, 0.08)),
+    rgba(255, 255, 255, 0.04);
+  box-shadow: inset 4px 0 0 rgba(77, 232, 255, 0.9), 0 18px 46px rgba(255, 53, 200, 0.12);
+}
+
+.gig-card__top::after,
+.assignment-summary::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -55% 24%;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255, 53, 200, 0.32), transparent 68%);
+  pointer-events: none;
+}
+
+.gig-card__top > *,
+.assignment-summary > * {
+  position: relative;
+  z-index: 1;
+}
+
+.gig-card h3,
+.assignment-row h3,
+.next-panel h3,
+.stats-grid .stat:first-child strong {
+  display: inline-block;
+  margin: 2px 0 0;
+  padding: 0 0 4px;
+  background: linear-gradient(90deg, #4de8ff 0%, #ff35c8 52%, #ffd166 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #4de8ff;
+  font-weight: 1000;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  text-shadow: 0 0 24px rgba(255, 53, 200, 0.24);
+}
+
+.gig-card h3,
+.assignment-row h3 {
+  font-size: clamp(24px, 3.6vw, 36px);
+}
+
+.next-panel h3,
+.stats-grid .stat:first-child strong {
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.gig-card .gig-meta,
+.assignment-summary span {
+  opacity: 0.84;
+}
+
 @media (min-width: 1500px) {
   .profile-grid.editable-profile-grid {
     grid-template-columns: minmax(0, 1.45fr) minmax(430px, 0.55fr);
@@ -436,7 +499,7 @@ body::before {
 
 @media (max-width: 760px) {
   .content {
-    padding: 20px 14px calc(96px + env(safe-area-inset-bottom));
+    padding: 20px 14px calc(86px + env(safe-area-inset-bottom));
   }
 
   .page-head h1,
@@ -463,5 +526,18 @@ body::before {
   .assignment-summary,
   .rule-row {
     grid-template-columns: 1fr;
+  }
+
+  .gig-card__top,
+  .assignment-summary {
+    padding: 14px 16px 16px;
+  }
+
+  .gig-card h3,
+  .assignment-row h3,
+  .next-panel h3,
+  .stats-grid .stat:first-child strong {
+    line-height: 1.16;
+    padding-bottom: 5px;
   }
 }
