@@ -14,11 +14,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
     <title>Black Label Talent Portal</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260624p" />
-    <link rel="stylesheet" href="./src/brand.css?v=20260624p" />
-    <link rel="stylesheet" href="./src/live.css?v=20260624p" />
-    <link rel="stylesheet" href="./src/app-polish.css?v=20260624p" />
-    <link rel="stylesheet" href="./src/mobile-polish.css?v=20260624p" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260624q" />
+    <link rel="stylesheet" href="./src/brand.css?v=20260624q" />
+    <link rel="stylesheet" href="./src/live.css?v=20260624q" />
+    <link rel="stylesheet" href="./src/app-polish.css?v=20260624q" />
+    <link rel="stylesheet" href="./src/mobile-polish.css?v=20260624q" />
   </head>
   <body>
     <div id="root"></div>
@@ -28,11 +28,26 @@
     <script type="importmap">
       {
         "imports": {
-          "/src/lib/hubApi.js?v=20260624p": "./src/lib/hubApi.js?v=20260624p"
+          "/src/lib/hubApi.js?v=20260624q": "./src/lib/hubApi.js?v=20260624q"
         }
       }
     </script>
-    <script type="module" src="./src/app.js?v=20260624p"></script>
-    <script type="module" src="./src/talent-fixes.js?v=20260624p"></script>
+    <script type="module" src="./src/app.js?v=20260624q"></script>
+    <script type="module" src="./src/talent-fixes.js?v=20260624q"></script>
+    <script type="module" src="./src/talent-communications.js?v=20260624q"></script>
+    <script type="module">
+      const patchHeroCopy = () => {
+        const headline = document.querySelector(".hero h1");
+        const copy = document.querySelector(".hero-copy");
+        if (headline && headline.textContent.trim() === "Your Pay the Black Label Way.") {
+          headline.textContent = "Black Label Talent";
+        }
+        if (copy && copy.textContent.trim() === "Your gigs, contracts, pay, and availability in one place.") {
+          copy.remove();
+        }
+      };
+      new MutationObserver(patchHeroCopy).observe(document.body, { childList: true, subtree: true });
+      patchHeroCopy();
+    </script>
   </body>
 </html>
