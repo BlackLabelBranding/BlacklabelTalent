@@ -20,7 +20,7 @@
   .content {
     width: 100%;
     max-width: 100%;
-    padding: 14px 12px calc(94px + env(safe-area-inset-bottom));
+    padding: 14px 12px calc(84px + env(safe-area-inset-bottom));
     overflow-x: hidden;
   }
 
@@ -31,13 +31,14 @@
     bottom: 0;
     top: auto;
     z-index: 50;
-    height: auto;
-    min-height: 72px;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    height: calc(72px + env(safe-area-inset-bottom));
+    min-height: 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255, 53, 200, 0.25);
     border-right: 0;
-    background: rgba(3, 2, 5, 0.94);
-    backdrop-filter: blur(18px);
+    background: rgba(3, 2, 5, 0.96);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
   }
 
   .sidebar .brand {
@@ -47,29 +48,36 @@
   .nav {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    grid-auto-flow: column;
+    grid-auto-rows: 1fr;
+    gap: 4px;
     width: 100%;
-    overflow: visible;
+    height: 60px;
+    overflow: hidden;
   }
 
   .nav a {
     min-width: 0;
-    min-height: 58px;
+    width: 100%;
+    min-height: 0;
+    height: 60px;
     display: grid;
     place-items: center;
+    align-content: center;
     gap: 3px;
-    padding: 7px 3px;
+    padding: 6px 2px;
     border: 1px solid transparent;
-    border-radius: 13px;
+    border-radius: 14px;
     font-size: 10px;
     line-height: 1.05;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .nav a::before {
     display: block;
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1;
     color: #fff;
     opacity: 0.92;
@@ -81,26 +89,23 @@
   .nav a[href="#assignments"]::before { content: "✓"; }
   .nav a[href="#profile"]::before { content: "●"; }
 
+  .nav a.active {
+    background: rgba(255, 53, 200, 0.15);
+    border-color: rgba(255, 53, 200, 0.45);
+  }
+
   .sign-out {
-    position: fixed;
-    right: 10px;
-    bottom: calc(84px + env(safe-area-inset-bottom));
-    z-index: 55;
-    min-height: 40px;
-    padding: 0 12px;
-    border-radius: 999px;
-    background: rgba(3, 2, 5, 0.78);
-    font-size: 12px;
+    display: none !important;
   }
 
   .hero {
     width: 100%;
     min-height: auto;
     display: grid;
-    gap: 18px;
+    gap: 16px;
     align-items: start;
     justify-content: stretch;
-    padding: 24px 20px;
+    padding: 22px 20px;
     border-radius: 14px;
     background-position: center top;
   }
@@ -131,8 +136,10 @@
   }
 
   .profile-chip {
-    width: 100%;
+    width: auto;
     min-width: 0;
+    max-width: 260px;
+    justify-self: start;
   }
 
   .stats-grid,
@@ -209,7 +216,7 @@
   }
 
   .hero {
-    padding: 22px 18px;
+    padding: 20px 18px;
   }
 
   .hero h1 {
@@ -221,6 +228,6 @@
   }
 
   .nav a::before {
-    font-size: 17px;
+    font-size: 19px;
   }
 }
