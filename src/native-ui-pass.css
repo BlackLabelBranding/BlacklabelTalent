@@ -1,0 +1,136 @@
+/* Native app UI pass: compact live status card + icon polish */
+.profile-chip {
+  position: relative;
+  width: min(100%, 250px);
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  align-self: end;
+  padding: 13px 15px 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(8, 16, 14, 0.76), rgba(19, 8, 27, 0.72)),
+    rgba(5, 2, 7, 0.48);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+.profile-chip::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #43ff9b;
+  box-shadow: 0 0 0 6px rgba(67, 255, 155, 0.12), 0 0 22px rgba(67, 255, 155, 0.84);
+  animation: statusPulse 2.15s ease-in-out infinite;
+}
+
+.profile-chip::after {
+  content: "Ready for Dispatch";
+  color: rgba(220, 199, 223, 0.78);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.profile-chip span {
+  order: 2;
+  margin: 0;
+  padding-left: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.profile-chip strong {
+  order: 1;
+  margin: 0;
+  padding-left: 19px;
+  color: #43ff9b;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(67, 255, 155, 0.42);
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(0.94); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+.stat-icon,
+.panel-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  color: transparent !important;
+  text-shadow: none !important;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(77, 232, 255, 0.34), transparent 45%),
+    rgba(77, 232, 255, 0.09);
+  box-shadow: 0 0 22px rgba(77, 232, 255, 0.14);
+}
+
+.stat-icon::before,
+.panel-icon::before {
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 0 9px rgba(77, 232, 255, 0.62));
+}
+
+.stats-grid .stat:nth-child(1) .stat-icon::before { content: "◷"; }
+.stats-grid .stat:nth-child(2) .stat-icon::before { content: "$"; font-weight: 1000; }
+.stats-grid .stat:nth-child(3) .stat-icon::before,
+.panel-icon::before { content: "▣"; }
+
+.gig-meta span {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.gig-meta span::before {
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 16px;
+  border-radius: 6px;
+  background: rgba(77, 232, 255, 0.1);
+  color: #4de8ff;
+  font-size: 10px;
+  font-weight: 1000;
+  box-shadow: 0 0 14px rgba(77, 232, 255, 0.12);
+}
+
+.gig-meta span:nth-child(1)::before { content: "👤"; font-size: 11px; }
+.gig-meta span:nth-child(2)::before { content: "⌖"; }
+.gig-meta span:nth-child(3)::before { content: "$"; color: #ffd166; }
+
+@media (max-width: 760px) {
+  .profile-chip {
+    max-width: 228px;
+    padding: 12px 14px 13px 15px;
+    border-radius: 16px;
+  }
+
+  .profile-chip span { font-size: 17px; }
+  .profile-chip strong { font-size: 10px; }
+  .profile-chip::after { font-size: 10px; }
+  .stat-icon { width: 26px; height: 26px; }
+}
