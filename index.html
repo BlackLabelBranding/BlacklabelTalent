@@ -14,28 +14,25 @@
     <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
     <title>Black Label Talent Portal</title>
-    <link rel="stylesheet" href="./src/styles.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/brand.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/live.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/app-polish.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/mobile-polish.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/native-ui-pass.css?v=20260624t" />
-    <link rel="stylesheet" href="./src/mission-control.css?v=20260624t" />
+    <link rel="stylesheet" href="./src/styles.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/brand.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/live.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/app-polish.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/mobile-polish.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/native-ui-pass.css?v=20260624y" />
+    <link rel="stylesheet" href="./src/mission-control.css?v=20260624y" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module">
-      import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./src/lib/hubApi.js?v=20260624u";
-      globalThis.BLACK_LABEL_SUPABASE_URL = SUPABASE_URL;
-      globalThis.BLACK_LABEL_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
-    </script>
-    <script type="module" src="./src/login-normalize.js?v=20260624t"></script>
-    <script type="module" src="./src/app.js?v=20260624t"></script>
-    <script type="module" src="./src/talent-fixes.js?v=20260624t"></script>
-    <script type="module" src="./src/talent-communications.js?v=20260624t"></script>
-    <script type="module" src="./src/mission-control.js?v=20260624t"></script>
-    <script type="module" src="./src/push-registration-fix.js?v=20260624t"></script>
-    <script type="module">
+      await import("./src/talent-config.js?v=20260624y");
+      await import("./src/login-normalize.js?v=20260624y");
+      await import("./src/app.js?v=20260624y");
+      await import("./src/talent-fixes.js?v=20260624y");
+      await import("./src/talent-communications.js?v=20260624y");
+      await import("./src/mission-control.js?v=20260624y");
+      await import("./src/push-registration-fix.js?v=20260624y");
+
       const patchHeroCopy = () => {
         const headline = document.querySelector(".hero h1");
         const copy = document.querySelector(".hero-copy");
